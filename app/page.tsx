@@ -34,7 +34,7 @@ export default function Home() {
   })
   const [loading, setLoading] = useState(false)
 
-  const inputClass = "border rounded px-3 py-2 w-full text-black placeholder-black"
+  const inputClass = "bg-gray-800 border-gray-600 text-white placeholder-gray-400 rounded px-3 py-2 w-full"
 
   // Fetch players
   const fetchPlayers = async () => {
@@ -53,31 +53,24 @@ export default function Home() {
   }, [])
 
   // Fetch rounds for selected player
-  useEffect(() => {
-    if (!selectedPlayer) return
-    const fetchRounds = async () => {
-      try {
-        const res = await fetch(`/api/rounds?player_id=${selectedPlayer}`)
-        const data = await res.json()
-        setRounds(data)
-      } catch (err) {
-        console.error(err)
-      }
+  const fetchRounds = async (player_id: string) => {
+    try {
+      const res = await fetch(`/api/rounds?player_id=${player_id}`)
+      const data = await res.json()
+      setRounds(data)
+    } catch (err) {
+      console.error(err)
     }
-    fetchRounds()
-  }, [selectedPlayer])
+  }
 
-  // Update form player_name on selection
   useEffect(() => {
     if (!selectedPlayer) return
-    const player = players.find((p) => p.id === selectedPlayer)
-    if (player) setForm((prev) => ({ ...prev, player_name: player.name }))
-  }, [selectedPlayer, players])
+    fetchRounds(selectedPlayer)
+  }, [selectedPlayer])
 
   // Add new player
   const handleAddPlayer = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newPlayer.name) return
     try {
       const res = await fetch("/api/players", {
         method: "POST",
@@ -89,9 +82,7 @@ export default function Home() {
         setPlayers((prev) => [...prev, data])
         setSelectedPlayer(data.id)
         setNewPlayer({ name: "", favorite_course: "" })
-      } else {
-        console.error(data.error)
-      }
+      } else console.error(data.error)
     } catch (err) {
       console.error(err)
     }
@@ -117,9 +108,7 @@ export default function Home() {
       const data = await res.json()
       if (res.ok) {
         setForm({ date: "", course: "", tee: "", rating: "", slope: "", score: "" })
-        const roundsRes = await fetch(`/api/rounds?player_id=${selectedPlayer}`)
-        const roundsData = await roundsRes.json()
-        setRounds(roundsData)
+        fetchRounds(selectedPlayer)
       } else console.error(data.error)
     } catch (err) {
       console.error(err)
@@ -138,7 +127,7 @@ export default function Home() {
   const handicap = calculateHandicap(rounds)
 
   return (
-    <main className="p-8 max-w-4xl mx-auto">
+    <main className="p-8 max-w-4xl mx-auto text-white">
       <h1 className="text-3xl font-bold mb-6">⛳ Golf Handicap Tracker</h1>
 
       {/* New Player Form */}
@@ -156,13 +145,9 @@ export default function Home() {
           placeholder="Favorite Course"
           value={newPlayer.favorite_course}
           onChange={(e) => setNewPlayer({ ...newPlayer, favorite_course: e.target.value })}
-          required
           className={inputClass}
         />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 col-span-1 sm:col-span-2"
-        >
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 col-span-1 sm:col-span-2">
           Add Player
         </button>
       </form>
@@ -188,41 +173,42 @@ export default function Home() {
       </div>
 
       {/* Round Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md mb-8 grid grid-cols-1 sm:grid-cols-4 gap-4"
-      >
-        <input type="date" name="date" placeholder="Date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className={inputClass}/>
-        <input type="text" name="course" placeholder="Course" value={form.course} onChange={(e) => setForm({ ...form, course: e.target.value })} required className={inputClass}/>
-        <input type="text" name="tee" placeholder="Tee" value={form.tee} onChange={(e) => setForm({ ...form, tee: e.target.value })} required className={inputClass}/>
-        <input type="number" step="0.1" name="rating" placeholder="Rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })} required className={inputClass}/>
-        <input type="number" name="slope" placeholder="Slope" value={form.slope} onChange={(e) => setForm({ ...form, slope: e.target.value })} required className={inputClass}/>
-        <input type="number" name="score" placeholder="Score" value={form.score} onChange={(e) => setForm({ ...form, score: e.target.value })} required className={inputClass}/>
+      <form onSubmit={handleSubmit} className="bg-gray-900 p-6 rounded-lg shadow-md mb-8 grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <input type="date" name="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className={inputClass}/>
+        <input type="text" name="course" value={form.course} onChange={(e) => setForm({ ...form, course: e.target.value })} required className={inputClass}/>
+        <input type="text" name="tee" value={form.tee} onChange={(e) => setForm({ ...form, tee: e.target.value })} required className={inputClass}/>
+        <input type="number" step="0.1" name="rating" value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })} required className={inputClass}/>
+        <input type="number" name="slope" value={form.slope} onChange={(e) => setForm({ ...form, slope: e.target.value })} required className={inputClass}/>
+        <input type="number" name="score" value={form.score} onChange={(e) => setForm({ ...form, score: e.target.value })} required className={inputClass}/>
         <button type="submit" disabled={loading} className="bg-green-600 text-white rounded px-4 py-2 hover:bg-green-700 col-span-1 sm:col-span-4">
           {loading ? "Saving..." : "Add Round"}
         </button>
       </form>
 
       {/* Rounds Table */}
-      <table className="w-full text-left border-collapse">
+      <table className="w-full text-left border-collapse bg-gray-800 rounded">
         <thead>
-          <tr className="bg-gray-200">
-            {["Date", "Course", "Tee", "Rating", "Slope", "Score"].map((h) => (
-              <th key={h} className="border px-4 py-2 text-black">{h}</th>
+          <tr className="bg-gray-700">
+            {["Player", "Date", "Course", "Tee", "Rating", "Slope", "Score"].map((h) => (
+              <th key={h} className="border px-4 py-2 text-white">{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rounds.map((r) => (
-            <tr key={r.id} className="hover:bg-gray-50">
-              <td className="border px-4 py-2">{r.date}</td>
-              <td className="border px-4 py-2">{r.course}</td>
-              <td className="border px-4 py-2">{r.tee}</td>
-              <td className="border px-4 py-2">{r.rating}</td>
-              <td className="border px-4 py-2">{r.slope}</td>
-              <td className="border px-4 py-2">{r.score}</td>
-            </tr>
-          ))}
+          {rounds.map((r) => {
+            const player = players.find(p => p.id === r.player_id)
+            return (
+              <tr key={r.id} className="hover:bg-gray-600">
+                <td className="border px-4 py-2">{player?.name || "Unknown"}</td>
+                <td className="border px-4 py-2">{r.date}</td>
+                <td className="border px-4 py-2">{r.course}</td>
+                <td className="border px-4 py-2">{r.tee}</td>
+                <td className="border px-4 py-2">{r.rating}</td>
+                <td className="border px-4 py-2">{r.slope}</td>
+                <td className="border px-4 py-2">{r.score}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </main>
