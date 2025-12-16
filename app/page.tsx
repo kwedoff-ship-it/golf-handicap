@@ -167,7 +167,9 @@ export default function Home() {
         <thead>
           <tr className="bg-gray-200">
             {["Player", "Date", "Course", "Tee", "Rating", "Slope", "Score"].map((h) => (
-              <th key={h} className="border px-4 py-2">
+              <th key={h} className={`border px-4 py-2 ${
+          ["Player", "Date", "Course"].includes(h) ? "text-red-600" : "text-black"
+        }`}>
                 {h}
               </th>
             ))}
