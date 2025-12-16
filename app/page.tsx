@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabaseServer } from "@/lib/supabaseServer"
 
 type Player = {
   id: string
@@ -38,24 +37,24 @@ export default function Home() {
   const inputClass = "border rounded px-3 py-2 w-full text-black placeholder-black"
 
   // Fetch players
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const res = await fetch("/api/players")
-        const data = await res.json()
-        setPlayers(data)
-        if (data.length > 0) setSelectedPlayer(data[0].id)
-      } catch (err) {
-        console.error(err)
-      }
+  const fetchPlayers = async () => {
+    try {
+      const res = await fetch("/api/players")
+      const data = await res.json()
+      setPlayers(data)
+      if (data.length > 0 && !selectedPlayer) setSelectedPlayer(data[0].id)
+    } catch (err) {
+      console.error(err)
     }
+  }
+
+  useEffect(() => {
     fetchPlayers()
   }, [])
 
   // Fetch rounds for selected player
   useEffect(() => {
     if (!selectedPlayer) return
-
     const fetchRounds = async () => {
       try {
         const res = await fetch(`/api/rounds?player_id=${selectedPlayer}`)
@@ -78,6 +77,7 @@ export default function Home() {
   // Add new player
   const handleAddPlayer = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!newPlayer.name) return
     try {
       const res = await fetch("/api/players", {
         method: "POST",
