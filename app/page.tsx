@@ -23,6 +23,10 @@ export default function Home() {
   const [players, setPlayers] = useState<Player[]>([])
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
   const [rounds, setRounds] = useState<Round[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const [newPlayerName, setNewPlayerName] = useState("")
+
   const [form, setForm] = useState({
     date: "",
     course: "",
@@ -31,29 +35,28 @@ export default function Home() {
     slope: "",
     score: "",
   })
-  const [loading, setLoading] = useState(false)
 
   const inputClass = "border rounded px-3 py-2 w-full text-black placeholder-black"
 
-  // Fetch players
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const res = await fetch("/api/players")
-        const data = await res.json()
-        setPlayers(data)
-        if (data.length > 0) setSelectedPlayer(data[0].id)
-      } catch (err) {
-        console.error(err)
-      }
+  // Fetch all players
+  const fetchPlayers = async () => {
+    try {
+      const res = await fetch("/api/players")
+      const data = await res.json()
+      setPlayers(data)
+      if (!selectedPlayer && data.length > 0) setSelectedPlayer(data[0].id)
+    } catch (err) {
+      console.error(err)
     }
+  }
+
+  useEffect(() => {
     fetchPlayers()
   }, [])
 
   // Fetch rounds for selected player
   useEffect(() => {
     if (!selectedPlayer) return
-
     const fetchRounds = async () => {
       try {
         const res = await fetch(`/api/rounds?player_id=${selectedPlayer}`)
@@ -71,7 +74,7 @@ export default function Home() {
     if (!selectedPlayer) return
     const player = players.find((p) => p.id === selectedPlayer)
     if (player) {
-      setForm((prev) => ({ ...prev, player_name: player.name }))
+      setForm((prev) => ({ ...prev }))
     }
   }, [selectedPlayer, players])
 
@@ -79,7 +82,7 @@ export default function Home() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRoundSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedPlayer) return
     setLoading(true)
@@ -111,11 +114,34 @@ export default function Home() {
     }
   }
 
+  const handleNewPlayerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newPlayerName.trim()) return
+    setLoading(true)
+    try {
+      const res = await fetch("/api/players", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newPlayerName }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setNewPlayerName("")
+        await fetchPlayers()
+        setSelectedPlayer(data.id) // select the newly created player
+      } else {
+        console.error(data.error)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const calculateHandicap = (rounds: Round[]) => {
     if (!rounds.length) return 0
-    const differentials = rounds.map(
-      (r) => ((r.score - r.rating) * 113) / r.slope
-    )
+    const differentials = rounds.map((r) => ((r.score - r.rating) * 113) / r.slope)
     const avgDiff = differentials.reduce((a, b) => a + b, 0) / differentials.length
     return parseFloat(avgDiff.toFixed(1))
   }
@@ -126,8 +152,26 @@ export default function Home() {
     <main className="p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">⛳ Golf Handicap Tracker</h1>
 
+      {/* New Player Form */}
+      <form onSubmit={handleNewPlayerSubmit} className="mb-6 flex gap-2">
+        <input
+          type="text"
+          placeholder="New Player Name"
+          value={newPlayerName}
+          onChange={(e) => setNewPlayerName(e.target.value)}
+          className={inputClass}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
+        >
+          Add Player
+        </button>
+      </form>
+
       {/* Player Selector */}
-      <div className="mb-6">
+      <div className="mb-4">
         <label className="block mb-2 font-semibold">Select Player:</label>
         <select
           value={selectedPlayer || ""}
@@ -148,7 +192,7 @@ export default function Home() {
 
       {/* Round Form */}
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleRoundSubmit}
         className="bg-white p-6 rounded-lg shadow-md mb-8 grid grid-cols-1 sm:grid-cols-4 gap-4"
       >
         <input
