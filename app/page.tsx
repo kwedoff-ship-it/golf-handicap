@@ -82,6 +82,9 @@ export default function Home() {
     }
   }
 
+  const inputClass =
+    "border rounded px-3 py-2 w-full text-black placeholder-black"
+
   return (
     <main className="p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">⛳ Golf Handicap Tracker</h1>
@@ -97,7 +100,7 @@ export default function Home() {
           value={form.player_name}
           onChange={handleChange}
           required
-          className="border rounded px-3 py-2 w-full"
+          className={inputClass}
         />
         <input
           type="date"
@@ -106,7 +109,7 @@ export default function Home() {
           value={form.date}
           onChange={handleChange}
           required
-          className="border rounded px-3 py-2 w-full"
+          className={inputClass}
         />
         <input
           type="text"
@@ -115,7 +118,7 @@ export default function Home() {
           value={form.course}
           onChange={handleChange}
           required
-          className="border rounded px-3 py-2 w-full"
+          className={inputClass}
         />
         <input
           type="text"
@@ -124,7 +127,7 @@ export default function Home() {
           value={form.tee}
           onChange={handleChange}
           required
-          className="border rounded px-3 py-2 w-full"
+          className={inputClass}
         />
         <input
           type="number"
@@ -134,7 +137,7 @@ export default function Home() {
           value={form.rating}
           onChange={handleChange}
           required
-          className="border rounded px-3 py-2 w-full"
+          className={inputClass}
         />
         <input
           type="number"
@@ -143,7 +146,7 @@ export default function Home() {
           value={form.slope}
           onChange={handleChange}
           required
-          className="border rounded px-3 py-2 w-full"
+          className={inputClass}
         />
         <input
           type="number"
@@ -152,7 +155,7 @@ export default function Home() {
           value={form.score}
           onChange={handleChange}
           required
-          className="border rounded px-3 py-2 w-full"
+          className={inputClass}
         />
         <button
           type="submit"
@@ -166,13 +169,20 @@ export default function Home() {
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-gray-200">
-            {["Player", "Date", "Course", "Tee", "Rating", "Slope", "Score"].map((h) => (
-              <th key={h} className={`border px-4 py-2 ${
-          ["Player", "Date", "Course"].includes(h) ? "text-red-600" : "text-black"
-        }`}>
-                {h}
-              </th>
-            ))}
+            {["Player", "Date", "Course", "Tee", "Rating", "Slope", "Score"].map(
+              (h) => (
+                <th
+                  key={h}
+                  className={`border px-4 py-2 ${
+                    ["Player", "Date", "Course"].includes(h)
+                      ? "text-red-600"
+                      : "text-black"
+                  }`}
+                >
+                  {h}
+                </th>
+              )
+            )}
           </tr>
         </thead>
         <tbody>
