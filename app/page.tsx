@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 
 type Player = {
@@ -33,9 +35,6 @@ export default function Home() {
     score: "",
   })
   const [loading, setLoading] = useState(false)
-
-  const inputClass =
-    "border rounded px-3 py-2 w-full text-white placeholder-white bg-gray-800"
 
   // Fetch players
   useEffect(() => {
@@ -103,9 +102,9 @@ export default function Home() {
           date: roundForm.date,
           course: roundForm.course,
           tee: roundForm.tee,
-          rating: parseFloat(roundForm.rating),
-          slope: parseInt(roundForm.slope),
-          score: parseInt(roundForm.score),
+          rating: Number.parseFloat(roundForm.rating),
+          slope: Number.parseInt(roundForm.slope),
+          score: Number.parseInt(roundForm.score),
         }),
       })
       const data = await res.json()
@@ -128,99 +127,229 @@ export default function Home() {
     if (!rounds.length) return 0
     const diffs = rounds.map((r) => ((r.score - r.rating) * 113) / r.slope)
     const avgDiff = diffs.reduce((a, b) => a + b, 0) / diffs.length
-    return parseFloat(avgDiff.toFixed(1))
+    return Number.parseFloat(avgDiff.toFixed(1))
   }
 
   const handicap = calculateHandicap(rounds)
+  const selectedPlayerData = players.find((p) => p.id === selectedPlayer)
 
   return (
-    <main className="p-8 max-w-4xl mx-auto text-white">
-      <h1 className="text-3xl font-bold mb-6">⛳ Golf Handicap Tracker</h1>
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-3 tracking-tight">Golf Handicap Tracker</h1>
+          <p className="text-slate-400 text-lg">Track your rounds and monitor your progress</p>
+        </div>
 
-      {/* New Player Form */}
-      <form onSubmit={handleAddPlayer} className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <input
-          type="text"
-          placeholder="Player Name"
-          value={newPlayer.name}
-          onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
-          required
-          className={inputClass}
-        />
-        <input
-          type="text"
-          placeholder="Favorite Course"
-          value={newPlayer.favorite_course}
-          onChange={(e) => setNewPlayer({ ...newPlayer, favorite_course: e.target.value })}
-          required
-          className={inputClass}
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 col-span-1 sm:col-span-2"
-        >
-          Add Player
-        </button>
-      </form>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Player Management & Handicap */}
+          <div className="space-y-6">
+            {/* Add New Player Card */}
+            <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
+              <h2 className="text-xl font-semibold text-white mb-4">Add Player</h2>
+              <form onSubmit={handleAddPlayer} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Player Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter name"
+                    value={newPlayer.name}
+                    onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
+                    required
+                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Favorite Course</label>
+                  <input
+                    type="text"
+                    placeholder="Enter course"
+                    value={newPlayer.favorite_course}
+                    onChange={(e) => setNewPlayer({ ...newPlayer, favorite_course: e.target.value })}
+                    required
+                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-lg transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50"
+                >
+                  Add Player
+                </button>
+              </form>
+            </div>
 
-      {/* Player Selector */}
-      <div className="mb-4">
-        <label className="block mb-2 font-semibold">Select Player:</label>
-        <select
-          value={selectedPlayer || ""}
-          onChange={(e) => setSelectedPlayer(e.target.value)}
-          className={inputClass}
-        >
-          {players.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name} ({p.favorite_course || "No Favorite Course"})
-            </option>
-          ))}
-        </select>
+            {/* Player Selector */}
+            <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
+              <h2 className="text-xl font-semibold text-white mb-4">Select Player</h2>
+              <select
+                value={selectedPlayer || ""}
+                onChange={(e) => setSelectedPlayer(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+              >
+                {players.map((p) => (
+                  <option key={p.id} value={p.id} className="bg-slate-800">
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              {selectedPlayerData && (
+                <div className="mt-3 text-sm text-slate-400">
+                  <span className="font-medium">Home Course:</span> {selectedPlayerData.favorite_course || "Not set"}
+                </div>
+              )}
+            </div>
+
+            {/* Handicap Display */}
+            <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-8 shadow-xl border border-emerald-500/20">
+              <div className="text-center">
+                <p className="text-emerald-100 text-sm font-medium uppercase tracking-wide mb-2">
+                  Current Handicap Index
+                </p>
+                <p className="text-6xl font-bold text-white mb-1">{handicap}</p>
+                <p className="text-emerald-100 text-sm">
+                  Based on {rounds.length} round{rounds.length !== 1 ? "s" : ""}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Rounds */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Add Round Form */}
+            <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
+              <h2 className="text-xl font-semibold text-white mb-6">Record New Round</h2>
+              <form onSubmit={handleAddRound} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Date</label>
+                    <input
+                      type="date"
+                      value={roundForm.date}
+                      onChange={(e) => setRoundForm({ ...roundForm, date: e.target.value })}
+                      required
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Course Name</label>
+                    <input
+                      type="text"
+                      placeholder="Course name"
+                      value={roundForm.course}
+                      onChange={(e) => setRoundForm({ ...roundForm, course: e.target.value })}
+                      required
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Tee</label>
+                    <input
+                      type="text"
+                      placeholder="Blue"
+                      value={roundForm.tee}
+                      onChange={(e) => setRoundForm({ ...roundForm, tee: e.target.value })}
+                      required
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Rating</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="72.5"
+                      value={roundForm.rating}
+                      onChange={(e) => setRoundForm({ ...roundForm, rating: e.target.value })}
+                      required
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Slope</label>
+                    <input
+                      type="number"
+                      placeholder="130"
+                      value={roundForm.slope}
+                      onChange={(e) => setRoundForm({ ...roundForm, slope: e.target.value })}
+                      required
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Score</label>
+                    <input
+                      type="number"
+                      placeholder="85"
+                      value={roundForm.score}
+                      onChange={(e) => setRoundForm({ ...roundForm, score: e.target.value })}
+                      required
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium px-4 py-3 rounded-lg transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50"
+                >
+                  {loading ? "Saving Round..." : "Save Round"}
+                </button>
+              </form>
+            </div>
+
+            {/* Rounds Table */}
+            <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+              <div className="p-6 border-b border-slate-800">
+                <h2 className="text-xl font-semibold text-white">Round History</h2>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-slate-800/50">
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Date</th>
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Course</th>
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Tee</th>
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Rating</th>
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Slope</th>
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800">
+                    {rounds.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                          No rounds recorded yet. Add your first round above.
+                        </td>
+                      </tr>
+                    ) : (
+                      rounds.map((r) => (
+                        <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="px-6 py-4 text-slate-200 font-medium">{r.date}</td>
+                          <td className="px-6 py-4 text-slate-200">{r.course}</td>
+                          <td className="px-6 py-4 text-slate-300">{r.tee}</td>
+                          <td className="px-6 py-4 text-slate-300">{r.rating}</td>
+                          <td className="px-6 py-4 text-slate-300">{r.slope}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              {r.score}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <div className="mb-4">
-        <span className="font-semibold">Current Handicap:</span> {handicap}
-      </div>
-
-      {/* Round Form */}
-      <form
-        onSubmit={handleAddRound}
-        className="bg-gray-900 p-6 rounded-lg shadow-md mb-8 grid grid-cols-1 sm:grid-cols-4 gap-4"
-      >
-        <input type="date" placeholder="Date" value={roundForm.date} onChange={(e) => setRoundForm({ ...roundForm, date: e.target.value })} required className={inputClass}/>
-        <input type="text" placeholder="Course" value={roundForm.course} onChange={(e) => setRoundForm({ ...roundForm, course: e.target.value })} required className={inputClass}/>
-        <input type="text" placeholder="Tee" value={roundForm.tee} onChange={(e) => setRoundForm({ ...roundForm, tee: e.target.value })} required className={inputClass}/>
-        <input type="number" step="0.1" placeholder="Rating" value={roundForm.rating} onChange={(e) => setRoundForm({ ...roundForm, rating: e.target.value })} required className={inputClass}/>
-        <input type="number" placeholder="Slope" value={roundForm.slope} onChange={(e) => setRoundForm({ ...roundForm, slope: e.target.value })} required className={inputClass}/>
-        <input type="number" placeholder="Score" value={roundForm.score} onChange={(e) => setRoundForm({ ...roundForm, score: e.target.value })} required className={inputClass}/>
-        <button type="submit" disabled={loading} className="bg-green-600 text-white rounded px-4 py-2 hover:bg-green-700 col-span-1 sm:col-span-4">
-          {loading ? "Saving..." : "Add Round"}
-        </button>
-      </form>
-
-      {/* Rounds Table */}
-      <table className="w-full text-left border-collapse bg-gray-800">
-        <thead>
-          <tr className="bg-gray-700">
-            {["Date", "Course", "Tee", "Rating", "Slope", "Score"].map((h) => (
-              <th key={h} className="border px-4 py-2">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rounds.map((r) => (
-            <tr key={r.id} className="hover:bg-gray-700">
-              <td className="border px-4 py-2">{r.date}</td>
-              <td className="border px-4 py-2">{r.course}</td>
-              <td className="border px-4 py-2">{r.tee}</td>
-              <td className="border px-4 py-2">{r.rating}</td>
-              <td className="border px-4 py-2">{r.slope}</td>
-              <td className="border px-4 py-2">{r.score}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </main>
   )
 }
