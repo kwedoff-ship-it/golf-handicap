@@ -9,15 +9,12 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const { name, favorite_course } = await req.json()
-  
-  if (!name) {
-    return NextResponse.json({ error: "Name is required" }, { status: 400 })
-  }
+  if (!name) return NextResponse.json({ error: "Name is required" }, { status: 400 })
 
   const { data, error } = await supabaseServer
     .from("players")
     .insert([{ name, favorite_course }])
-    .select() // return the inserted row
+    .select()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data[0])
