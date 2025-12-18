@@ -1,9 +1,48 @@
-"use client"
+/**
+ * =============================================================================
+ * ADD ROUND FORM COMPONENT
+ * =============================================================================
+ * 
+ * A collapsible form component for recording new golf rounds.
+ * 
+ * FEATURES:
+ * - Collapsible/expandable form (starts collapsed)
+ * - Multi-field form with date, course, tee, rating, slope, score
+ * - Type conversion (strings to numbers for rating, slope, score)
+ * - Form validation (required fields, numeric validation)
+ * - Loading state during submission
+ * - Auto-reset form on success
+ * - Auto-collapse form on success
+ * - Disabled when no player is selected
+ * 
+ * REACT PATTERNS:
+ * - Uses useState for local form state
+ * - Controlled inputs (value + onChange)
+ * - Form submission with preventDefault
+ * - Conditional rendering for expanded/collapsed state
+ * - Type conversion on submit
+ * 
+ * TAILWIND STYLING:
+ * - Dark theme with slate colors
+ * - Emerald accent colors for buttons
+ * - Responsive grid layout (adapts to screen size)
+ * - Smooth transitions
+ */
+
+"use client" // Next.js directive: This is a Client Component
 
 import type React from "react"
-import { useState } from "react"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { useState } from "react" // React hook for component state
+import { ChevronDown, ChevronUp } from "lucide-react" // Icon components
 
+/**
+ * Props Interface
+ * 
+ * @property onAddRound - Callback function that handles adding a round
+ *                        Returns a Promise with success/error result
+ * @property playerId - Currently selected player ID (null if none selected)
+ *                      Form is disabled if this is null
+ */
 interface AddRoundFormProps {
   onAddRound: (round: {
     player_id: string
@@ -17,35 +56,83 @@ interface AddRoundFormProps {
   playerId: string | null
 }
 
+/**
+ * AddRoundForm Component
+ * 
+ * Self-contained form component for recording golf rounds
+ * Manages its own state and communicates with parent via callback
+ */
 export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
+  // ===========================================================================
+  // STATE MANAGEMENT
+  // ===========================================================================
+  
+  /**
+   * Expanded State
+   * Controls whether the form is visible or collapsed
+   */
   const [isExpanded, setIsExpanded] = useState(false)
+  
+  /**
+   * Form Data State
+   * All fields stored as strings initially (HTML inputs return strings)
+   * Converted to numbers (rating, slope, score) on submit
+   */
   const [formData, setFormData] = useState({
-    date: "",
-    course: "",
-    tee: "",
-    rating: "",
-    slope: "",
-    score: "",
+    date: "",      // Date input value (YYYY-MM-DD format)
+    course: "",    // Course name
+    tee: "",       // Tee box (e.g., "Blue", "White")
+    rating: "",    // Course rating (will be parsed to float)
+    slope: "",     // Slope rating (will be parsed to int)
+    score: "",     // Total score (will be parsed to int)
   })
+  
+  /**
+   * Loading State
+   * Prevents duplicate submissions
+   */
   const [loading, setLoading] = useState(false)
 
+  // ===========================================================================
+  // EVENT HANDLERS
+  // ===========================================================================
+  
+  /**
+   * Handle Form Submit
+   * 
+   * PURPOSE:
+   * - Prevent default form submission
+   * - Validate player is selected
+   * - Convert string inputs to numbers
+   * - Call parent's onAddRound callback
+   * - Reset form and collapse on success
+   * 
+   * TYPE CONVERSION:
+   * - rating: string → float (allows decimals like 72.5)
+   * - slope: string → integer (whole numbers only)
+   * - score: string → integer (whole numbers only)
+   */
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault() // Prevent page reload
 
+    // Guard clause: require player selection
     if (!playerId) return
 
-    setLoading(true)
+    setLoading(true) // Show loading state
 
+    // Call parent's callback with converted data
+    // Note: rating, slope, score are converted from strings to numbers
     const result = await onAddRound({
       player_id: playerId,
       date: formData.date,
       course: formData.course,
       tee: formData.tee,
-      rating: Number.parseFloat(formData.rating),
-      slope: Number.parseInt(formData.slope),
-      score: Number.parseInt(formData.score),
+      rating: Number.parseFloat(formData.rating),  // Convert to float (72.5)
+      slope: Number.parseInt(formData.slope),       // Convert to int (130)
+      score: Number.parseInt(formData.score),        // Convert to int (85)
     })
 
+    // If successful, clean up form
     if (result.success) {
       setFormData({
         date: "",
@@ -55,14 +142,19 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
         slope: "",
         score: "",
       })
-      setIsExpanded(false)
+      setIsExpanded(false) // Collapse form
     }
 
-    setLoading(false)
+    setLoading(false) // Clear loading state
   }
 
+  // ===========================================================================
+  // RENDER
+  // ===========================================================================
+  
   return (
     <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl shadow-xl overflow-hidden">
+      {/* Collapsible Header Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-6 flex items-center justify-between text-left hover:bg-slate-800/30 transition-colors"
@@ -75,16 +167,23 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
         )}
       </button>
 
+      {/* Form Content - Only shown when expanded */}
       {isExpanded && (
         <div className="px-6 pb-6 border-t border-slate-800 pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 
+              First Row: Date and Course Name
+              Responsive grid: 1 column on mobile, 3 columns on larger screens
+              Date takes 1 column, Course takes 2 columns
+            */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Date Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Date
                 </label>
                 <input
-                  type="date"
+                  type="date" // HTML5 date picker
                   value={formData.date}
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
@@ -93,6 +192,8 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
                   className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 />
               </div>
+              
+              {/* Course Name Input (spans 2 columns on larger screens) */}
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Course Name
@@ -110,7 +211,12 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
               </div>
             </div>
 
+            {/* 
+              Second Row: Tee, Rating, Slope, Score
+              Responsive grid: 2 columns on mobile, 4 columns on larger screens
+            */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Tee Box Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Tee
@@ -126,13 +232,15 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
                   className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 />
               </div>
+              
+              {/* Course Rating Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Rating
                 </label>
                 <input
                   type="number"
-                  step="0.1"
+                  step="0.1" // Allow decimal values (e.g., 72.5)
                   placeholder="72.5"
                   value={formData.rating}
                   onChange={(e) =>
@@ -142,6 +250,8 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
                   className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 />
               </div>
+              
+              {/* Slope Rating Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Slope
@@ -157,6 +267,8 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
                   className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 />
               </div>
+              
+              {/* Score Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Score
@@ -174,9 +286,10 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading || !playerId}
+              disabled={loading || !playerId} // Disable if loading OR no player selected
               className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium px-4 py-3 rounded-lg transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50"
             >
               {loading ? "Saving Round..." : "Save Round"}
@@ -187,4 +300,3 @@ export function AddRoundForm({ onAddRound, playerId }: AddRoundFormProps) {
     </div>
   )
 }
-

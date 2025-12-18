@@ -1,30 +1,106 @@
-import { useState, useEffect } from "react"
-import type { Player } from "@/lib/types"
+/**
+ * =============================================================================
+ * usePlayers CUSTOM HOOK
+ * =============================================================================
+ * 
+ * A custom React hook that manages player data fetching and state.
+ * Encapsulates all player-related API calls and state management.
+ * 
+ * FEATURES:
+ * - Fetches all players on mount
+ * - Provides loading and error states
+ * - addPlayer function for creating new players
+ * - Automatic state updates after adding player
+ * - Error handling for API failures
+ * 
+ * REACT PATTERNS:
+ * - Custom hook (starts with "use")
+ * - useState for local state management
+ * - useEffect for data fetching on mount
+ * - Returns object with state and functions
+ * 
+ * USAGE:
+ * const { players, loading, error, addPlayer } = usePlayers()
+ * 
+ * DATA FLOW:
+ * 1. Hook fetches players on mount
+ * 2. Updates players state with fetched data
+ * 3. Provides addPlayer function to create new players
+ * 4. Automatically updates local state after successful creation
+ */
 
+import { useState, useEffect } from "react" // React hooks
+import type { Player } from "@/lib/types" // TypeScript type
+
+/**
+ * usePlayers Hook
+ * 
+ * Returns an object containing:
+ * - players: Array of all players
+ * - loading: Boolean indicating if data is being fetched
+ * - error: String error message (null if no error)
+ * - addPlayer: Function to add a new player
+ */
 export function usePlayers() {
+  // ===========================================================================
+  // STATE MANAGEMENT
+  // ===========================================================================
+  
+  /**
+   * Players State
+   * Stores the array of all players fetched from the API
+   * Initially empty array, populated after fetch completes
+   */
   const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
+  
+  /**
+   * Loading State
+   * Indicates whether data is currently being fetched
+   * true = fetch in progress
+   * false = fetch complete (or not started)
+   */
+  const [loading, setLoading] = useState(true) // Start as true (fetching on mount)
+  
+  /**
+   * Error State
+   * Stores error message if fetch fails
+   * null = no error
+   * string = error message
+   */
   const [error, setError] = useState<string | null>(null)
 
+  // ===========================================================================
+  // DATA FETCHING (Runs on Component Mount)
+  // ===========================================================================
+  
+  /**
+   * Fetch Players Effect
+   * Runs once when component using this hook mounts
+   * Empty dependency array [] means it only runs once
+   */
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        setLoading(true)
-        setError(null)
+        setLoading(true) // Start loading
+        setError(null) // Clear any previous errors
 
+        // Make API request to fetch all players
         const res = await fetch("/api/players")
+        
+        // Validate response is JSON (not HTML error page)
         const contentType = res.headers.get("content-type")
-
         if (!contentType || !contentType.includes("application/json")) {
           const text = await res.text()
           console.error("API returned non-JSON response:", text)
           setError("Invalid response from server")
-          setPlayers([])
+          setPlayers([]) // Set to empty array to prevent crashes
           return
         }
 
+        // Parse JSON response
         const data = await res.json()
 
+        // Check if API returned an error object
         if (data.error) {
           console.error("API error:", data.error)
           setError(data.error)
@@ -32,50 +108,82 @@ export function usePlayers() {
           return
         }
 
+        // Validate data is an array before using it
         if (Array.isArray(data)) {
-          setPlayers(data)
+          setPlayers(data) // Update state with fetched players
         } else {
           console.error("Players data is not an array:", data)
           setError("Invalid data format")
           setPlayers([])
         }
       } catch (err) {
+        // Catch network errors, JSON parse errors, etc.
         console.error("Error fetching players:", err)
         setError(err instanceof Error ? err.message : "Failed to fetch players")
         setPlayers([])
       } finally {
+        // Always clear loading state, even if error occurred
         setLoading(false)
       }
     }
 
-    fetchPlayers()
-  }, [])
+    fetchPlayers() // Call the async function
+  }, []) // Empty dependency array = run once on mount
 
+  // ===========================================================================
+  // ADD PLAYER FUNCTION
+  // ===========================================================================
+  
+  /**
+   * Add Player Function
+   * Creates a new player via API and updates local state
+   * 
+   * @param player - Player data (without id, which is generated by database)
+   * @returns Object with success status and optional error/data
+   */
   const addPlayer = async (player: Omit<Player, "id">) => {
+    // Omit<Player, "id"> means Player type but without the id field
+    // (id is generated by database, not provided by user)
+    
     try {
+      // Make POST request to create new player
       const res = await fetch("/api/players", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(player),
+        body: JSON.stringify(player), // Convert object to JSON string
       })
 
       const data = await res.json()
 
+      // Check if request was successful (status 200-299)
       if (res.ok) {
+        // Add new player to existing players array
+        // Uses functional update to ensure we have latest state
         setPlayers((prev) => [...prev, data])
-        return { success: true, data }
+        // [...prev, data] creates new array with all previous players + new one
+        
+        return { success: true, data } // Return success with created player data
       } else {
+        // Request failed (400, 500, etc.)
         const error = data.error || "Failed to add player"
         console.error(error)
         return { success: false, error }
       }
     } catch (err) {
+      // Catch network errors, etc.
       const error = err instanceof Error ? err.message : "Failed to add player"
       console.error(error)
       return { success: false, error }
     }
   }
 
+  // ===========================================================================
+  // RETURN VALUES
+  // ===========================================================================
+  
+  /**
+   * Return Hook Interface
+   * Components using this hook can destructure these values
+   */
   return { players, loading, error, addPlayer }
 }
-
