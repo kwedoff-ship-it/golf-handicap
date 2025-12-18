@@ -441,277 +441,274 @@ export default function Home() {
           <p className="text-slate-400 text-lg">Track your rounds and monitor your progress</p>
         </div>
 
-        {/* Top Section: Player Selector + KPI Tiles */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Player Selector */}
-          <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
-            <h2 className="text-xl font-semibold text-white mb-4">Select Player</h2>
-            <select
-              value={selectedPlayer || ""}
-              onChange={(e) => setSelectedPlayer(e.target.value)}
-              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-lg"
+        {/* Player Selector */}
+        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
+          <h2 className="text-xl font-semibold text-white mb-4">Select Player</h2>
+          <select
+            value={selectedPlayer || ""}
+            onChange={(e) => setSelectedPlayer(e.target.value)}
+            className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-lg"
+          >
+            {players.map((p) => (
+              <option key={p.id} value={p.id} className="bg-slate-800">
+                {p.name}
+              </option>
+            ))}
+          </select>
+          {selectedPlayerData && (
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-slate-400">
+                <span className="font-medium">Home Course:</span> {selectedPlayerData.favorite_course || "Not set"}
+              </div>
+              <button
+                onClick={() => setViewingProfile(true)}
+                className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
+              >
+                View Full Profile
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* KPI Section - 3 tiles */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Handicap KPI */}
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-8 shadow-xl border border-emerald-500/20">
+            <div className="text-center">
+              <p className="text-emerald-100 text-sm font-medium uppercase tracking-wide mb-2">
+                Current Handicap Index
+              </p>
+              <p className="text-6xl font-bold text-white mb-1">{handicap}</p>
+              <p className="text-emerald-100 text-sm">
+                Based on {rounds.length} round{rounds.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl p-8 shadow-xl border border-amber-500/20">
+            <div className="text-center">
+              <p className="text-amber-100 text-sm font-medium uppercase tracking-wide mb-2">Rounds This Year</p>
+              <p className="text-6xl font-bold text-white mb-1">{roundsThisYear}</p>
+              <p className="text-amber-100 text-sm">{new Date().getFullYear()}</p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-sky-600 to-sky-700 rounded-xl p-8 shadow-xl border border-sky-500/20">
+            <div className="text-center">
+              <p className="text-sky-100 text-sm font-medium uppercase tracking-wide mb-2">Total Rounds</p>
+              <p className="text-6xl font-bold text-white mb-1">{totalRounds}</p>
+              <p className="text-sky-100 text-sm">All Time</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Rounds Table */}
+        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-white">Recent Rounds (Last 10)</h2>
+            {rounds.length > 10 && (
+              <button
+                onClick={() => setViewingProfile(true)}
+                className="text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
+              >
+                View All
+              </button>
+            )}
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-800/50">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Date</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Course</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Tee</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Rating</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Slope</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Score</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {recentRounds.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                      No rounds recorded yet. Add your first round below.
+                    </td>
+                  </tr>
+                ) : (
+                  recentRounds.map((r) => (
+                    <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="px-6 py-4 text-slate-200 font-medium">
+                        {new Date(r.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </td>
+                      <td className="px-6 py-4 text-slate-200">{r.course}</td>
+                      <td className="px-6 py-4 text-slate-300">{r.tee}</td>
+                      <td className="px-6 py-4 text-slate-300">{r.rating}</td>
+                      <td className="px-6 py-4 text-slate-300">{r.slope}</td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          {r.score}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Add Player and Round Forms */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Add Player - Expandable */}
+          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl shadow-xl overflow-hidden">
+            <button
+              onClick={() => setIsAddPlayerExpanded(!isAddPlayerExpanded)}
+              className="w-full p-6 flex items-center justify-between text-left hover:bg-slate-800/30 transition-colors"
             >
-              {players.map((p) => (
-                <option key={p.id} value={p.id} className="bg-slate-800">
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            {selectedPlayerData && (
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-slate-400">
-                  <span className="font-medium">Home Course:</span> {selectedPlayerData.favorite_course || "Not set"}
-                </div>
-                <button
-                  onClick={() => setViewingProfile(true)}
-                  className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
-                >
-                  View Full Profile
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+              <h2 className="text-xl font-semibold text-white">Add New Player</h2>
+              {isAddPlayerExpanded ? (
+                <ChevronUp className="h-5 w-5 text-slate-400" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-slate-400" />
+              )}
+            </button>
+
+            {isAddPlayerExpanded && (
+              <div className="px-6 pb-6 border-t border-slate-800 pt-6">
+                <form onSubmit={handleAddPlayer} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Player Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter name"
+                      value={newPlayer.name}
+                      onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
+                      required
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Favorite Course</label>
+                    <input
+                      type="text"
+                      placeholder="Enter course"
+                      value={newPlayer.favorite_course}
+                      onChange={(e) => setNewPlayer({ ...newPlayer, favorite_course: e.target.value })}
+                      required
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-lg transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50"
+                  >
+                    Add Player
+                  </button>
+                </form>
               </div>
             )}
           </div>
 
-          {/* KPI Section - now 3 tiles */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {/* Handicap KPI */}
-            <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-8 shadow-xl border border-emerald-500/20">
-              <div className="text-center">
-                <p className="text-emerald-100 text-sm font-medium uppercase tracking-wide mb-2">
-                  Current Handicap Index
-                </p>
-                <p className="text-6xl font-bold text-white mb-1">{handicap}</p>
-                <p className="text-emerald-100 text-sm">
-                  Based on {rounds.length} round{rounds.length !== 1 ? "s" : ""}
-                </p>
-              </div>
-            </div>
+          {/* Record Round - Expandable */}
+          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl shadow-xl overflow-hidden">
+            <button
+              onClick={() => setIsAddRoundExpanded(!isAddRoundExpanded)}
+              className="w-full p-6 flex items-center justify-between text-left hover:bg-slate-800/30 transition-colors"
+            >
+              <h2 className="text-xl font-semibold text-white">Record New Round</h2>
+              {isAddRoundExpanded ? (
+                <ChevronUp className="h-5 w-5 text-slate-400" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-slate-400" />
+              )}
+            </button>
 
-            <div className="bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl p-8 shadow-xl border border-amber-500/20">
-              <div className="text-center">
-                <p className="text-amber-100 text-sm font-medium uppercase tracking-wide mb-2">Rounds This Year</p>
-                <p className="text-6xl font-bold text-white mb-1">{roundsThisYear}</p>
-                <p className="text-amber-100 text-sm">{new Date().getFullYear()}</p>
-              </div>
-            </div>
+            {isAddRoundExpanded && (
+              <div className="px-6 pb-6 border-t border-slate-800 pt-6">
+                <form onSubmit={handleAddRound} className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Date</label>
+                      <input
+                        type="date"
+                        value={roundForm.date}
+                        onChange={(e) => setRoundForm({ ...roundForm, date: e.target.value })}
+                        required
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Course Name</label>
+                      <input
+                        type="text"
+                        placeholder="Course name"
+                        value={roundForm.course}
+                        onChange={(e) => setRoundForm({ ...roundForm, course: e.target.value })}
+                        required
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
 
-            <div className="bg-gradient-to-br from-sky-600 to-sky-700 rounded-xl p-8 shadow-xl border border-sky-500/20">
-              <div className="text-center">
-                <p className="text-sky-100 text-sm font-medium uppercase tracking-wide mb-2">Total Rounds</p>
-                <p className="text-6xl font-bold text-white mb-1">{totalRounds}</p>
-                <p className="text-sky-100 text-sm">All Time</p>
-              </div>
-            </div>
-          </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Tee</label>
+                      <input
+                        type="text"
+                        placeholder="Blue"
+                        value={roundForm.tee}
+                        onChange={(e) => setRoundForm({ ...roundForm, tee: e.target.value })}
+                        required
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Rating</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        placeholder="72.5"
+                        value={roundForm.rating}
+                        onChange={(e) => setRoundForm({ ...roundForm, rating: e.target.value })}
+                        required
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Slope</label>
+                      <input
+                        type="number"
+                        placeholder="130"
+                        value={roundForm.slope}
+                        onChange={(e) => setRoundForm({ ...roundForm, slope: e.target.value })}
+                        required
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Score</label>
+                      <input
+                        type="number"
+                        placeholder="85"
+                        value={roundForm.score}
+                        onChange={(e) => setRoundForm({ ...roundForm, score: e.target.value })}
+                        required
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
 
-          <div className="mb-8">
-            <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-              <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-white">Recent Rounds (Last 10)</h2>
-                {rounds.length > 10 && (
                   <button
-                    onClick={() => setViewingProfile(true)}
-                    className="text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium px-4 py-3 rounded-lg transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50"
                   >
-                    View All
+                    {loading ? "Saving Round..." : "Save Round"}
                   </button>
-                )}
+                </form>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-800/50">
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Date</th>
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Course</th>
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Tee</th>
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Rating</th>
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Slope</th>
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-slate-300">Score</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800">
-                    {recentRounds.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                          No rounds recorded yet. Add your first round below.
-                        </td>
-                      </tr>
-                    ) : (
-                      recentRounds.map((r) => (
-                        <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="px-6 py-4 text-slate-200 font-medium">
-                            {new Date(r.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                          </td>
-                          <td className="px-6 py-4 text-slate-200">{r.course}</td>
-                          <td className="px-6 py-4 text-slate-300">{r.tee}</td>
-                          <td className="px-6 py-4 text-slate-300">{r.rating}</td>
-                          <td className="px-6 py-4 text-slate-300">{r.slope}</td>
-                          <td className="px-6 py-4">
-                            <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                              {r.score}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Add Player - Expandable */}
-            <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl shadow-xl overflow-hidden">
-              <button
-                onClick={() => setIsAddPlayerExpanded(!isAddPlayerExpanded)}
-                className="w-full p-6 flex items-center justify-between text-left hover:bg-slate-800/30 transition-colors"
-              >
-                <h2 className="text-xl font-semibold text-white">Add New Player</h2>
-                {isAddPlayerExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-slate-400" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                )}
-              </button>
-
-              {isAddPlayerExpanded && (
-                <div className="px-6 pb-6 border-t border-slate-800 pt-6">
-                  <form onSubmit={handleAddPlayer} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Player Name</label>
-                      <input
-                        type="text"
-                        placeholder="Enter name"
-                        value={newPlayer.name}
-                        onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
-                        required
-                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Favorite Course</label>
-                      <input
-                        type="text"
-                        placeholder="Enter course"
-                        value={newPlayer.favorite_course}
-                        onChange={(e) => setNewPlayer({ ...newPlayer, favorite_course: e.target.value })}
-                        required
-                        className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-lg transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50"
-                    >
-                      Add Player
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
-
-            {/* Record Round - Expandable */}
-            <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl shadow-xl overflow-hidden">
-              <button
-                onClick={() => setIsAddRoundExpanded(!isAddRoundExpanded)}
-                className="w-full p-6 flex items-center justify-between text-left hover:bg-slate-800/30 transition-colors"
-              >
-                <h2 className="text-xl font-semibold text-white">Record New Round</h2>
-                {isAddRoundExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-slate-400" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                )}
-              </button>
-
-              {isAddRoundExpanded && (
-                <div className="px-6 pb-6 border-t border-slate-800 pt-6">
-                  <form onSubmit={handleAddRound} className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Date</label>
-                        <input
-                          type="date"
-                          value={roundForm.date}
-                          onChange={(e) => setRoundForm({ ...roundForm, date: e.target.value })}
-                          required
-                          className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Course Name</label>
-                        <input
-                          type="text"
-                          placeholder="Course name"
-                          value={roundForm.course}
-                          onChange={(e) => setRoundForm({ ...roundForm, course: e.target.value })}
-                          required
-                          className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Tee</label>
-                        <input
-                          type="text"
-                          placeholder="Blue"
-                          value={roundForm.tee}
-                          onChange={(e) => setRoundForm({ ...roundForm, tee: e.target.value })}
-                          required
-                          className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Rating</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          placeholder="72.5"
-                          value={roundForm.rating}
-                          onChange={(e) => setRoundForm({ ...roundForm, rating: e.target.value })}
-                          required
-                          className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Slope</label>
-                        <input
-                          type="number"
-                          placeholder="130"
-                          value={roundForm.slope}
-                          onChange={(e) => setRoundForm({ ...roundForm, slope: e.target.value })}
-                          required
-                          className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Score</label>
-                        <input
-                          type="number"
-                          placeholder="85"
-                          value={roundForm.score}
-                          onChange={(e) => setRoundForm({ ...roundForm, score: e.target.value })}
-                          required
-                          className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium px-4 py-3 rounded-lg transition-all shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50"
-                    >
-                      {loading ? "Saving Round..." : "Save Round"}
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
