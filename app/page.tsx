@@ -124,12 +124,49 @@ export default function Home() {
     }
   }
 
-  // Calculate handicap
+  // Calculate handicap using USGA World Handicap System
   const calculateHandicap = (rounds: Round[]) => {
     if (!rounds.length) return 0
+    
+    // Calculate differentials for each round
     const diffs = rounds.map((r) => ((r.score - r.rating) * 113) / r.slope)
-    const avgDiff = diffs.reduce((a, b) => a + b, 0) / diffs.length
-    return Number.parseFloat(avgDiff.toFixed(1))
+    
+    // Determine how many differentials to use based on total rounds
+    let numToUse: number
+    const totalRounds = diffs.length
+    
+    if (totalRounds >= 20) {
+      numToUse = 8 // Best 8 of last 20
+    } else if (totalRounds === 19) {
+      numToUse = 7
+    } else if (totalRounds === 18) {
+      numToUse = 6
+    } else if (totalRounds >= 15) {
+      numToUse = 5
+    } else if (totalRounds >= 12) {
+      numToUse = 4
+    } else if (totalRounds >= 9) {
+      numToUse = 3
+    } else if (totalRounds >= 6) {
+      numToUse = 2
+    } else if (totalRounds >= 3) {
+      numToUse = 1
+    } else {
+      // Less than 3 rounds - cannot calculate official handicap
+      return 0
+    }
+    
+    // Sort differentials (lowest to highest) and take the best N
+    const sortedDiffs = [...diffs].sort((a, b) => a - b)
+    const bestDiffs = sortedDiffs.slice(0, numToUse)
+    
+    // Calculate average of best differentials
+    const avgDiff = bestDiffs.reduce((a, b) => a + b, 0) / bestDiffs.length
+    
+    // Handicap Index is average multiplied by 0.96 (96% multiplier)
+    const handicapIndex = avgDiff * 0.96
+    
+    return Number.parseFloat(handicapIndex.toFixed(1))
   }
 
   const handicap = calculateHandicap(rounds)
