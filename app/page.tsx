@@ -46,11 +46,19 @@ export default function Home() {
   const [isAddRoundExpanded, setIsAddRoundExpanded] = useState(false)
   const [viewingProfile, setViewingProfile] = useState(false)
 
-  // Fetch players
+  // Fetch players on mount
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         const res = await fetch("/api/players")
+
+        const contentType = res.headers.get("content-type")
+        if (!contentType || !contentType.includes("application/json")) {
+          console.error("[v0] API returned non-JSON response:", await res.text())
+          setPlayers([])
+          return
+        }
+
         const data = await res.json()
         console.log("[v0] Players fetched:", data)
 
@@ -82,6 +90,14 @@ export default function Home() {
     const fetchRounds = async () => {
       try {
         const res = await fetch(`/api/rounds?player_id=${selectedPlayer}`)
+
+        const contentType = res.headers.get("content-type")
+        if (!contentType || !contentType.includes("application/json")) {
+          console.error("[v0] Rounds API returned non-JSON response")
+          setRounds([])
+          return
+        }
+
         const data = await res.json()
 
         if (data.error) {
