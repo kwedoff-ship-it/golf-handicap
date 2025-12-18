@@ -27,9 +27,58 @@
  * 2. Updates players state with fetched data
  * 3. Provides addPlayer function to create new players
  * 4. Automatically updates local state after successful creation
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY - CLIENT-SIDE DATA FETCHING
+ * =============================================================================
+ * 
+ * CURRENT: Client-Side Data Fetching Hook
+ * - Runs in browser after page loads
+ * - Uses fetch() to call API routes
+ * - Manages loading/error state in React
+ * 
+ * WHY CLIENT-SIDE:
+ * - ✅ Hooks can only run in Client Components
+ * - ✅ Provides reactive state updates
+ * - ✅ Good for real-time updates
+ * - ✅ Works with interactive components
+ * 
+ * LIMITATIONS:
+ * - ❌ Data not available in initial HTML (SEO impact)
+ * - ❌ Waterfall: Page loads → JS loads → API call → Data renders
+ * - ❌ Slower perceived performance
+ * - ❌ Requires JavaScript enabled
+ * 
+ * =============================================================================
+ * POTENTIAL IMPROVEMENTS (Future Refactoring)
+ * =============================================================================
+ * 
+ * OPTION 1: Server Component Data Fetching
+ * - Fetch players directly in Server Component
+ * - Use Supabase client in server component
+ * - Pass data as props to client components
+ * - Benefits: Faster, SEO-friendly, smaller bundle
+ * 
+ * OPTION 2: Server Actions
+ * - Replace addPlayer with Server Action
+ * - Server Actions can be called from Client Components
+ * - No need for API route
+ * - Better type safety
+ * - Automatic revalidation
+ * 
+ * OPTION 3: React Server Components + Client Components Hybrid
+ * - Server Component: Fetches initial data
+ * - Client Component: Handles mutations and updates
+ * - Use this hook only for mutations, not initial fetch
+ * 
+ * WHEN TO KEEP THIS APPROACH:
+ * - Real-time data updates needed
+ * - Highly interactive dashboards
+ * - Data that changes frequently
+ * - When server-side fetching isn't feasible
  */
 
-import { useState, useEffect } from "react" // React hooks
+import { useState, useEffect } from "react" // React hooks (Client Component only)
 import type { Player } from "@/lib/types" // TypeScript type
 
 /**

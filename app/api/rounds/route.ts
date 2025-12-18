@@ -26,6 +26,74 @@
  * - Table: "rounds"
  * - Fields: id (UUID), player_id (UUID), date (date), course (text),
  *           tee (text), rating (float), slope (int), score (int)
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY - API ROUTES
+ * =============================================================================
+ * 
+ * CURRENT: API Route (Server-Side)
+ * - Runs exclusively on the server
+ * - Not included in client JavaScript bundle
+ * - Handles HTTP requests (GET with query params, POST)
+ * - Direct database access via Supabase
+ * 
+ * WHY API ROUTE:
+ * - ✅ Server-side only (secure, no client exposure)
+ * - ✅ Supports query parameters for filtering
+ * - ✅ Standard REST API pattern
+ * - ✅ Can be called from any client
+ * 
+ * PERFORMANCE:
+ * - ✅ Runs on server (fast, no client overhead)
+ * - ✅ Can be cached at edge/CDN level
+ * - ✅ No JavaScript bundle impact
+ * 
+ * =============================================================================
+ * POTENTIAL IMPROVEMENTS (Future Refactoring)
+ * =============================================================================
+ * 
+ * OPTION 1: Server Actions (Recommended for Next.js 13+)
+ * - Replace API routes with Server Actions
+ * - Server Actions: export async function addRound(formData: FormData)
+ * - Can be called directly from Client Components
+ * - Better type safety and error handling
+ * - Automatic revalidation after mutations
+ * 
+ * Benefits:
+ * - ✅ Simpler code (no request/response handling)
+ * - ✅ Better type safety (TypeScript inference)
+ * - ✅ Automatic form handling
+ * - ✅ Progressive enhancement (works without JS)
+ * 
+ * Migration:
+ * - Create app/actions/rounds.ts
+ * - export async function addRound(formData: FormData)
+ * - export async function getRounds(playerId: string)
+ * - Call from Client Component: await addRound(formData)
+ * - Remove this API route
+ * 
+ * OPTION 2: Server Components for GET
+ * - For GET requests, consider fetching directly in Server Component
+ * - No API route needed for initial data
+ * - Fetch in app/page.tsx or app/profile/[id]/page.tsx
+ * - Only use API route for mutations (or use Server Actions)
+ * 
+ * OPTION 3: Keep API Routes (If needed)
+ * - Keep if you need REST API for external clients
+ * - Keep if you need webhooks
+ * - Keep if you prefer explicit HTTP endpoints
+ * 
+ * WHEN TO USE API ROUTES:
+ * - Building public REST API
+ * - Third-party integrations
+ * - Webhooks
+ * - When Server Actions aren't sufficient
+ * 
+ * WHEN TO USE SERVER ACTIONS:
+ * - Internal app operations (recommended)
+ * - Form submissions
+ * - Mutations from Client Components
+ * - Better Next.js integration
  */
 
 import { supabaseServer } from "@/lib/supabaseServer" // Supabase client for server-side operations

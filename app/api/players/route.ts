@@ -24,6 +24,68 @@
  * - Uses Supabase for data storage
  * - Table: "players"
  * - Fields: id (UUID), name (text), favorite_course (text, optional)
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY - API ROUTES
+ * =============================================================================
+ * 
+ * CURRENT: API Route (Server-Side)
+ * - Runs exclusively on the server
+ * - Not included in client JavaScript bundle
+ * - Handles HTTP requests (GET, POST)
+ * - Direct database access via Supabase
+ * 
+ * WHY API ROUTE:
+ * - ✅ Server-side only (secure, no client exposure)
+ * - ✅ Direct database access
+ * - ✅ Standard REST API pattern
+ * - ✅ Can be called from any client (web, mobile, etc.)
+ * 
+ * PERFORMANCE:
+ * - ✅ Runs on server (fast, no client overhead)
+ * - ✅ Can be cached at edge/CDN level
+ * - ✅ No JavaScript bundle impact
+ * 
+ * =============================================================================
+ * POTENTIAL IMPROVEMENTS (Future Refactoring)
+ * =============================================================================
+ * 
+ * OPTION 1: Server Actions (Recommended for Next.js 13+)
+ * - Replace API routes with Server Actions
+ * - Server Actions are simpler: export async function addPlayer()
+ * - Can be called directly from Client Components
+ * - Better type safety (TypeScript inference)
+ * - Automatic revalidation
+ * - No need for fetch() calls
+ * 
+ * Benefits:
+ * - ✅ Simpler code (no request/response handling)
+ * - ✅ Better type safety
+ * - ✅ Automatic form handling
+ * - ✅ Progressive enhancement
+ * 
+ * Migration:
+ * - Create app/actions/players.ts
+ * - export async function addPlayer(formData: FormData)
+ * - Call from Client Component: await addPlayer(formData)
+ * - Remove this API route
+ * 
+ * OPTION 2: Keep API Routes (If needed)
+ * - Keep if you need REST API for external clients
+ * - Keep if you need webhooks or third-party integrations
+ * - Keep if you prefer explicit HTTP endpoints
+ * 
+ * WHEN TO USE API ROUTES:
+ * - Building public REST API
+ * - Third-party integrations
+ * - Webhooks
+ * - When Server Actions aren't sufficient
+ * 
+ * WHEN TO USE SERVER ACTIONS:
+ * - Internal app operations (recommended)
+ * - Form submissions
+ * - Mutations from Client Components
+ * - Better Next.js integration
  */
 
 import { supabaseServer } from "@/lib/supabaseServer" // Supabase client for server-side operations

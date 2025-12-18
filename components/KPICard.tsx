@@ -22,6 +22,32 @@
  * - Large text for value (text-6xl)
  * - Responsive design
  * - Shadow and border effects
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY
+ * =============================================================================
+ * 
+ * CURRENT: No "use client" directive = Server Component (by default)
+ * - This component can be rendered on the server
+ * - No client-side JavaScript needed
+ * - Can be used in both Server and Client Components
+ * 
+ * WHY IT WORKS AS SERVER COMPONENT:
+ * - ✅ No useState, useEffect, or event handlers
+ * - ✅ No browser APIs
+ * - ✅ Pure presentational component
+ * - ✅ Just receives props and renders
+ * 
+ * PERFORMANCE BENEFITS:
+ * - ✅ Rendered on server (faster initial load)
+ * - ✅ No JavaScript bundle overhead
+ * - ✅ Can be streamed independently
+ * - ✅ Works without JavaScript enabled
+ * 
+ * NOTE:
+ * - Currently used inside Client Components (Dashboard, Profile)
+ * - When parent is Client Component, this still works but loses server benefits
+ * - In future refactor, if parent becomes Server Component, this will gain benefits
  */
 
 import type React from "react"

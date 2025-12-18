@@ -29,9 +29,46 @@
  * - Dark gradient background
  * - Two-column layout (stats sidebar + main content)
  * - Responsive design
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY
+ * =============================================================================
+ * 
+ * CURRENT: Client Component ("use client" directive)
+ * - Requires client-side rendering due to useMemo hooks
+ * - Receives data via props from parent
+ * - Interactive back button
+ * 
+ * WHY CLIENT COMPONENT:
+ * - Uses useMemo for expensive calculations (handicap, history, stats)
+ * - Has onClick handler (back button)
+ * - Part of dynamic view switching
+ * 
+ * POTENTIAL IMPROVEMENTS:
+ * - Could be converted to separate route: app/profile/[id]/page.tsx
+ *   * Server Component: Fetches player and rounds data on server
+ *   * Better URL structure (/profile/123 instead of ?view=profile)
+ *   * Enables static generation for public profiles
+ *   * Better caching and prefetching
+ * 
+ * - Calculations could move to server:
+ *   * Calculate handicap, history, stats on server
+ *   * Pass pre-calculated data as props
+ *   * Reduces client-side JavaScript
+ * 
+ * - Static parts could be Server Components:
+ *   * Header, layout structure = Server Component
+ *   * Only interactive buttons = Client Component
+ * 
+ * FUTURE REFACTOR IDEA:
+ * - Create app/profile/[id]/page.tsx (Server Component route)
+ * - Fetch data in server component
+ * - Create ProfileClient.tsx for interactive parts
+ * - Use Server Actions for any mutations
+ * - Benefits: Better SEO, faster load, proper URLs
  */
 
-"use client" // Next.js directive: Client Component
+"use client" // Next.js directive: Client Component (needs useMemo and onClick handlers)
 
 import { useMemo } from "react" // React hook for memoized calculations
 import { ArrowLeft } from "lucide-react" // Back arrow icon

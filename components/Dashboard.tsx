@@ -28,9 +28,37 @@
  * - Dark gradient background
  * - Responsive grid layouts
  * - Consistent spacing and typography
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY
+ * =============================================================================
+ * 
+ * CURRENT: Client Component ("use client" directive)
+ * - Requires client-side rendering due to useMemo hook
+ * - Receives data via props from parent (which is also client component)
+ * - All interactivity happens in browser
+ * 
+ * WHY CLIENT COMPONENT:
+ * - Uses useMemo for performance optimization (client-side calculation)
+ * - Receives callback functions as props (event handlers)
+ * - Part of interactive dashboard flow
+ * 
+ * POTENTIAL IMPROVEMENTS:
+ * - If parent becomes Server Component, could split this:
+ *   * Server Component wrapper: Fetches data, passes to client component
+ *   * Client Component: Handles interactivity (current Dashboard)
+ * - useMemo calculations could move to server (calculate on server, pass as props)
+ * - Static parts (header, layout) could be Server Component
+ * - Only interactive parts need to be Client Components
+ * 
+ * FUTURE REFACTOR IDEA:
+ * - Create DashboardServer.tsx (Server Component) that fetches data
+ * - Keep Dashboard.tsx as Client Component for interactivity
+ * - Server component passes data to client component
+ * - Benefits: Faster initial load, better SEO, smaller bundle
  */
 
-"use client" // Next.js directive: Client Component
+"use client" // Next.js directive: Client Component (needs useMemo and callbacks)
 
 import { useMemo } from "react" // React hook for memoized calculations
 import type { Player, Round } from "@/lib/types"

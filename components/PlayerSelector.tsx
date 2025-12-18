@@ -22,9 +22,33 @@
  * - Dark theme card
  * - Styled select dropdown
  * - Hover effects on interactive elements
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY
+ * =============================================================================
+ * 
+ * CURRENT: Client Component ("use client" directive)
+ * - Requires client-side rendering for interactivity
+ * - Uses controlled select input (onChange handler)
+ * - Has onClick handler for "View Profile" button
+ * 
+ * WHY CLIENT COMPONENT:
+ * - ✅ Needs onChange handler for select dropdown
+ * - ✅ Needs onClick handler for button
+ * - ✅ Part of interactive dashboard flow
+ * 
+ * THIS IS CORRECT:
+ * - Interactive form controls must be Client Components
+ * - Cannot be converted to Server Component
+ * 
+ * NOTE:
+ * - Could potentially split into Server + Client:
+ *   * Server Component: Renders static structure
+ *   * Client Component: Handles interactivity (select, button)
+ * - But current approach is simpler and fine for this use case
  */
 
-"use client" // Next.js directive: Client Component
+"use client" // Next.js directive: Client Component (needs onChange and onClick handlers)
 
 import type React from "react"
 import { ChevronRight } from "lucide-react" // Icon component

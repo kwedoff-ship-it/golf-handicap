@@ -25,9 +25,39 @@
  * - Sticky header with backdrop blur
  * - Responsive overflow handling
  * - Hover states for interactivity
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY
+ * =============================================================================
+ * 
+ * CURRENT: Client Component ("use client" directive)
+ * - Marked as client component, but could potentially be Server Component
+ * - Only uses calculateDifferential utility function
+ * - No hooks, no event handlers, no state
+ * 
+ * WHY IT'S CLIENT COMPONENT:
+ * - Currently used inside Client Components (Dashboard, Profile)
+ * - When parent is Client Component, child must also be Client
+ * - calculateDifferential is pure function (could run on server)
+ * 
+ * POTENTIAL IMPROVEMENT:
+ * - Could be Server Component if parent becomes Server Component
+ * - calculateDifferential is pure (no browser APIs)
+ * - No interactivity needed (just displays data)
+ * - Only reason it's client: parent is client
+ * 
+ * FUTURE REFACTOR IDEA:
+ * - If Dashboard/Profile become Server Components, this can too
+ * - Pre-calculate differentials on server
+ * - Pass pre-calculated data as props
+ * - Benefits: Smaller bundle, faster render
+ * 
+ * NOTE:
+ * - Current approach is fine (works correctly)
+ * - Optimization opportunity if parent components change
  */
 
-"use client" // Next.js directive: Client Component
+"use client" // Next.js directive: Client Component (only because parent is client)
 
 import type { Round } from "@/lib/types"
 import { calculateDifferential } from "@/lib/handicap" // Utility function for calculating differential

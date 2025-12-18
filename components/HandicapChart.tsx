@@ -30,9 +30,40 @@
  * TAILWIND STYLING:
  * - Dark theme colors
  * - Custom tooltip styling
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY
+ * =============================================================================
+ * 
+ * CURRENT: Client Component ("use client" directive)
+ * - Requires client-side rendering for chart interactivity
+ * - Uses Recharts library (requires browser APIs)
+ * - Interactive tooltips and hover effects
+ * 
+ * WHY CLIENT COMPONENT:
+ * - ✅ Recharts library requires browser DOM APIs
+ * - ✅ Interactive tooltips on hover
+ * - ✅ Chart rendering happens in browser
+ * - ✅ Cannot run on server
+ * 
+ * THIS IS CORRECT:
+ * - Chart libraries (Recharts, Chart.js, etc.) must be Client Components
+ * - Cannot be converted to Server Component
+ * - Interactive visualizations require browser APIs
+ * 
+ * PERFORMANCE CONSIDERATIONS:
+ * - Chart library adds to JavaScript bundle size
+ * - Consider code-splitting if bundle size becomes issue
+ * - Could lazy load chart component
+ * 
+ * FUTURE OPTIMIZATION:
+ * - Lazy load: const HandicapChart = dynamic(() => import('./HandicapChart'))
+ * - Only load chart library when needed
+ * - Reduces initial bundle size
+ * - Benefits: Faster initial load, smaller bundle
  */
 
-"use client" // Next.js directive: Client Component
+"use client" // Next.js directive: Client Component (Recharts requires browser APIs)
 
 import {
   Line,

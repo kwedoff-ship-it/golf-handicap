@@ -27,9 +27,42 @@
  * - Emerald accent colors for buttons
  * - Responsive grid layout (adapts to screen size)
  * - Smooth transitions
+ * 
+ * =============================================================================
+ * NEXT.JS RENDERING STRATEGY
+ * =============================================================================
+ * 
+ * CURRENT: Client Component ("use client" directive)
+ * - Requires client-side rendering for form interactivity
+ * - Uses useState for form state and UI state (expanded/collapsed)
+ * - Handles form submission with event handlers
+ * 
+ * WHY CLIENT COMPONENT:
+ * - ✅ Needs useState for form state management
+ * - ✅ Needs onClick handlers for expand/collapse
+ * - ✅ Needs onSubmit handler for form submission
+ * - ✅ Needs controlled inputs (value + onChange)
+ * - ✅ Needs type conversion (string to number)
+ * 
+ * THIS IS CORRECT:
+ * - Forms with interactivity must be Client Components
+ * - Cannot be converted to Server Component
+ * 
+ * POTENTIAL IMPROVEMENTS:
+ * - Replace onAddRound callback with Server Action
+ *   * Server Actions can be called directly from Client Components
+ *   * No need for API route (/api/rounds)
+ *   * Better type safety and error handling
+ *   * Automatic revalidation after mutation
+ * 
+ * FUTURE REFACTOR IDEA:
+ * - Create server action: app/actions/rounds.ts
+ * - export async function addRound(formData: FormData)
+ * - Call from this component: await addRound(formData)
+ * - Benefits: Simpler, type-safe, no API route needed
  */
 
-"use client" // Next.js directive: This is a Client Component
+"use client" // Next.js directive: Client Component (needs hooks, state, event handlers)
 
 import type React from "react"
 import { useState } from "react" // React hook for component state
