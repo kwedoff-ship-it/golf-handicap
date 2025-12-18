@@ -1,5 +1,5 @@
 import { supabaseServer } from "@/lib/supabaseServer"
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
 /* ---------------- GET: fetch rounds for a player ---------------- */
 export async function GET(req: NextRequest) {
@@ -27,15 +27,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const { player_id, date, course, tee, rating, slope, score } = await req.json()
 
-  if (!player_id)
-    return NextResponse.json({ error: "Player ID required" }, { status: 400 })
+  if (!player_id) return NextResponse.json({ error: "Player ID required" }, { status: 400 })
 
   if (!date || !course || !tee || !rating || !slope || !score)
     return NextResponse.json({ error: "All round fields are required" }, { status: 400 })
 
-  const ratingNum = parseFloat(rating)
-  const slopeNum = parseInt(slope)
-  const scoreNum = parseInt(score)
+  const ratingNum = Number.parseFloat(rating)
+  const slopeNum = Number.parseInt(slope)
+  const scoreNum = Number.parseInt(score)
 
   if (isNaN(ratingNum) || isNaN(slopeNum) || isNaN(scoreNum))
     return NextResponse.json({ error: "Invalid numeric values" }, { status: 400 })
