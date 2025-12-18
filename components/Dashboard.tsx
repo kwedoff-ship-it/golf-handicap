@@ -30,32 +30,47 @@
  * - Consistent spacing and typography
  * 
  * =============================================================================
- * NEXT.JS RENDERING STRATEGY
+ * NEXT.JS RENDERING STRATEGY - HYBRID APPROACH
  * =============================================================================
  * 
  * CURRENT: Client Component ("use client" directive)
- * - Requires client-side rendering due to useMemo hook
- * - Receives data via props from parent (which is also client component)
- * - All interactivity happens in browser
+ * - Receives server-fetched data as props (from HomeClient)
+ * - Handles interactivity (player selection, view switching)
+ * - Performs calculations client-side (useMemo)
+ * 
+ * DATA FLOW (Server → Client):
+ * 1. Server Component (app/page.tsx) fetches players and rounds
+ * 2. Server passes data to HomeClient (client component)
+ * 3. HomeClient passes data to Dashboard (this component)
+ * 4. Dashboard receives data and renders
  * 
  * WHY CLIENT COMPONENT:
- * - Uses useMemo for performance optimization (client-side calculation)
- * - Receives callback functions as props (event handlers)
- * - Part of interactive dashboard flow
+ * - ✅ Needs useMemo for calculations (handicap, roundsThisYear, recentRounds)
+ * - ✅ Receives callback functions as props (event handlers)
+ * - ✅ Part of interactive dashboard flow
+ * - ✅ Handles user interactions (player selection, navigation)
  * 
- * POTENTIAL IMPROVEMENTS:
- * - If parent becomes Server Component, could split this:
- *   * Server Component wrapper: Fetches data, passes to client component
- *   * Client Component: Handles interactivity (current Dashboard)
- * - useMemo calculations could move to server (calculate on server, pass as props)
- * - Static parts (header, layout) could be Server Component
- * - Only interactive parts need to be Client Components
+ * SERVER-SIDE BENEFITS (Already Achieved):
+ * - ✅ Initial data fetched on server (fast)
+ * - ✅ Data available in HTML (SEO-friendly)
+ * - ✅ Smaller JavaScript bundle (no data fetching code)
  * 
- * FUTURE REFACTOR IDEA:
- * - Create DashboardServer.tsx (Server Component) that fetches data
- * - Keep Dashboard.tsx as Client Component for interactivity
- * - Server component passes data to client component
- * - Benefits: Faster initial load, better SEO, smaller bundle
+ * CLIENT-SIDE CALCULATIONS:
+ * - Handicap calculation (useMemo)
+ * - Rounds this year (useMemo)
+ * - Recent rounds sorting (useMemo)
+ * 
+ * POTENTIAL FURTHER OPTIMIZATION:
+ * - Could pre-calculate handicap on server
+ * - Could pre-calculate roundsThisYear on server
+ * - Could pre-sort recent rounds on server
+ * - Pass pre-calculated values as props
+ * - Benefits: Even smaller bundle, faster render
+ * 
+ * CURRENT APPROACH IS GOOD:
+ * - Data comes from server (fast initial load)
+ * - Calculations happen client-side (acceptable for this use case)
+ * - Good balance of performance and simplicity
  */
 
 "use client" // Next.js directive: Client Component (needs useMemo and callbacks)

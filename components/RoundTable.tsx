@@ -27,34 +27,53 @@
  * - Hover states for interactivity
  * 
  * =============================================================================
- * NEXT.JS RENDERING STRATEGY
+ * NEXT.JS RENDERING STRATEGY - SERVER DATA, CLIENT RENDERING
  * =============================================================================
  * 
  * CURRENT: Client Component ("use client" directive)
- * - Marked as client component, but could potentially be Server Component
- * - Only uses calculateDifferential utility function
+ * - Receives server-fetched data as props
+ * - Calculates differentials client-side
  * - No hooks, no event handlers, no state
  * 
+ * SERVER-SIDE DATA:
+ * - ✅ Rounds data comes from server (fast, SEO-friendly)
+ * - ✅ Data available in initial HTML
+ * - ✅ No client-side API calls needed
+ * 
+ * CLIENT-SIDE CALCULATIONS:
+ * - calculateDifferential runs client-side
+ * - Pure function (no side effects)
+ * - Could run on server, but current approach is fine
+ * 
  * WHY IT'S CLIENT COMPONENT:
- * - Currently used inside Client Components (Dashboard, Profile)
+ * - Used inside Client Components (Dashboard, Profile)
  * - When parent is Client Component, child must also be Client
  * - calculateDifferential is pure function (could run on server)
  * 
- * POTENTIAL IMPROVEMENT:
- * - Could be Server Component if parent becomes Server Component
- * - calculateDifferential is pure (no browser APIs)
- * - No interactivity needed (just displays data)
- * - Only reason it's client: parent is client
+ * SERVER vs CLIENT RENDERING:
  * 
- * FUTURE REFACTOR IDEA:
- * - If Dashboard/Profile become Server Components, this can too
+ * SERVER RENDERING (If we converted):
+ * - ✅ Pre-calculate differentials on server
+ * - ✅ Smaller JavaScript bundle
+ * - ✅ Faster render (no calculations needed)
+ * - ❌ More complex (need to pass pre-calculated data)
+ * 
+ * CLIENT RENDERING (Current):
+ * - ✅ Simpler (calculations happen where used)
+ * - ✅ Flexible (easy to change calculations)
+ * - ✅ Data comes from server (already fast)
+ * - ❌ Slightly larger bundle (calculation code)
+ * 
+ * CURRENT APPROACH IS GOOD:
+ * - Data fetching is server-side (main performance win)
+ * - Calculations are lightweight (acceptable client-side)
+ * - Good balance of performance and simplicity
+ * 
+ * FUTURE OPTIMIZATION (If needed):
  * - Pre-calculate differentials on server
- * - Pass pre-calculated data as props
+ * - Pass as props: roundsWithDiffs[]
  * - Benefits: Smaller bundle, faster render
- * 
- * NOTE:
- * - Current approach is fine (works correctly)
- * - Optimization opportunity if parent components change
+ * - Trade-off: More complex data structure
  */
 
 "use client" // Next.js directive: Client Component (only because parent is client)

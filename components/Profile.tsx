@@ -31,41 +31,67 @@
  * - Responsive design
  * 
  * =============================================================================
- * NEXT.JS RENDERING STRATEGY
+ * NEXT.JS RENDERING STRATEGY - HYBRID APPROACH
  * =============================================================================
  * 
  * CURRENT: Client Component ("use client" directive)
- * - Requires client-side rendering due to useMemo hooks
- * - Receives data via props from parent
- * - Interactive back button
+ * - Receives server-fetched data as props (from HomeClient)
+ * - Performs calculations client-side (useMemo)
+ * - Handles interactivity (back button)
+ * 
+ * DATA FLOW (Server → Client):
+ * 1. Server Component (app/page.tsx) fetches player and rounds
+ * 2. Server passes data to HomeClient (client component)
+ * 3. HomeClient passes data to Profile (this component)
+ * 4. Profile receives data and performs calculations
  * 
  * WHY CLIENT COMPONENT:
- * - Uses useMemo for expensive calculations (handicap, history, stats)
- * - Has onClick handler (back button)
- * - Part of dynamic view switching
+ * - ✅ Needs useMemo for calculations (handicap, history, stats)
+ * - ✅ Has onClick handler (back button)
+ * - ✅ Part of dynamic view switching
  * 
- * POTENTIAL IMPROVEMENTS:
- * - Could be converted to separate route: app/profile/[id]/page.tsx
- *   * Server Component: Fetches player and rounds data on server
- *   * Better URL structure (/profile/123 instead of ?view=profile)
- *   * Enables static generation for public profiles
- *   * Better caching and prefetching
+ * SERVER-SIDE BENEFITS (Already Achieved):
+ * - ✅ Initial data fetched on server (fast)
+ * - ✅ Data available in HTML (SEO-friendly)
+ * - ✅ Smaller JavaScript bundle (no data fetching code)
  * 
- * - Calculations could move to server:
- *   * Calculate handicap, history, stats on server
- *   * Pass pre-calculated data as props
- *   * Reduces client-side JavaScript
+ * CLIENT-SIDE CALCULATIONS:
+ * - Handicap calculation (useMemo)
+ * - Handicap history (useMemo)
+ * - Average score (useMemo)
+ * - Best score (useMemo)
+ * - Round sorting (useMemo)
  * 
- * - Static parts could be Server Components:
- *   * Header, layout structure = Server Component
- *   * Only interactive buttons = Client Component
+ * SERVER vs CLIENT RENDERING:
  * 
- * FUTURE REFACTOR IDEA:
- * - Create app/profile/[id]/page.tsx (Server Component route)
- * - Fetch data in server component
- * - Create ProfileClient.tsx for interactive parts
- * - Use Server Actions for any mutations
- * - Benefits: Better SEO, faster load, proper URLs
+ * SERVER RENDERING (If we pre-calculated):
+ * - ✅ Pre-calculate all stats on server
+ * - ✅ Smaller JavaScript bundle
+ * - ✅ Faster render (no calculations)
+ * - ❌ More complex (need to pass many props)
+ * 
+ * CLIENT RENDERING (Current):
+ * - ✅ Simpler (calculations happen where used)
+ * - ✅ Flexible (easy to change calculations)
+ * - ✅ Data comes from server (already fast)
+ * - ❌ Slightly larger bundle (calculation code)
+ * 
+ * CURRENT APPROACH IS GOOD:
+ * - Data fetching is server-side (main performance win)
+ * - Calculations are acceptable client-side
+ * - Good balance of performance and simplicity
+ * 
+ * FUTURE OPTIMIZATION (If needed):
+ * - Pre-calculate handicap, history, stats on server
+ * - Pass as props: { handicap, history, averageScore, bestScore }
+ * - Benefits: Smaller bundle, faster render
+ * - Trade-off: More props, less flexible
+ * 
+ * ROUTE-BASED ALTERNATIVE:
+ * - Could use app/profile/[id]/page.tsx (Server Component route)
+ * - Better URL structure (/profile/123)
+ * - Enables better caching
+ * - But current approach is simpler for now
  */
 
 "use client" // Next.js directive: Client Component (needs useMemo and onClick handlers)
