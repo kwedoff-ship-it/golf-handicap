@@ -441,40 +441,40 @@ export default function Home() {
           <p className="text-slate-400 text-lg">Track your rounds and monitor your progress</p>
         </div>
 
-        {/* Player Selector */}
-        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl">
-          <h2 className="text-xl font-semibold text-white mb-4">Select Player</h2>
-          <select
-            value={selectedPlayer || ""}
-            onChange={(e) => setSelectedPlayer(e.target.value)}
-            className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-lg"
-          >
-            {players.map((p) => (
-              <option key={p.id} value={p.id} className="bg-slate-800">
-                {p.name}
-              </option>
-            ))}
-          </select>
-          {selectedPlayerData && (
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-slate-400">
-                <span className="font-medium">Home Course:</span> {selectedPlayerData.favorite_course || "Not set"}
+        {/* Player Selector + KPI Tiles - All on one row */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Player Selector */}
+          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 shadow-xl flex flex-col">
+            <h2 className="text-xl font-semibold text-white mb-4">Select Player</h2>
+            <select
+              value={selectedPlayer || ""}
+              onChange={(e) => setSelectedPlayer(e.target.value)}
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-lg"
+            >
+              {players.map((p) => (
+                <option key={p.id} value={p.id} className="bg-slate-800">
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            {selectedPlayerData && (
+              <div className="mt-4 flex-1 flex flex-col justify-between">
+                <div className="text-sm text-slate-400">
+                  <span className="font-medium">Home Course:</span> {selectedPlayerData.favorite_course || "Not set"}
+                </div>
+                <button
+                  onClick={() => setViewingProfile(true)}
+                  className="mt-3 flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
+                >
+                  View Full Profile
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                onClick={() => setViewingProfile(true)}
-                className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium"
-              >
-                View Full Profile
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* KPI Section - 3 tiles */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Handicap KPI */}
-          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-8 shadow-xl border border-emerald-500/20">
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-6 shadow-xl border border-emerald-500/20 flex flex-col justify-center">
             <div className="text-center">
               <p className="text-emerald-100 text-sm font-medium uppercase tracking-wide mb-2">
                 Current Handicap Index
@@ -486,19 +486,21 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl p-8 shadow-xl border border-amber-500/20">
+          {/* Rounds This Year KPI */}
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-6 shadow-xl border border-emerald-500/20 flex flex-col justify-center">
             <div className="text-center">
-              <p className="text-amber-100 text-sm font-medium uppercase tracking-wide mb-2">Rounds This Year</p>
+              <p className="text-emerald-100 text-sm font-medium uppercase tracking-wide mb-2">Rounds This Year</p>
               <p className="text-6xl font-bold text-white mb-1">{roundsThisYear}</p>
-              <p className="text-amber-100 text-sm">{new Date().getFullYear()}</p>
+              <p className="text-emerald-100 text-sm">{new Date().getFullYear()}</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-sky-600 to-sky-700 rounded-xl p-8 shadow-xl border border-sky-500/20">
+          {/* Total Rounds KPI */}
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-6 shadow-xl border border-emerald-500/20 flex flex-col justify-center">
             <div className="text-center">
-              <p className="text-sky-100 text-sm font-medium uppercase tracking-wide mb-2">Total Rounds</p>
+              <p className="text-emerald-100 text-sm font-medium uppercase tracking-wide mb-2">Total Rounds</p>
               <p className="text-6xl font-bold text-white mb-1">{totalRounds}</p>
-              <p className="text-sky-100 text-sm">All Time</p>
+              <p className="text-emerald-100 text-sm">All Time</p>
             </div>
           </div>
         </div>
