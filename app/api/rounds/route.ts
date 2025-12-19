@@ -5,14 +5,6 @@
  * 
  * Next.js API Route Handler for round-related operations.
  * 
- * FILE LOCATION: app/api/rounds/route.ts
- * ENDPOINT: /api/rounds
- * 
- * NEXT.JS CONVENTIONS:
- * - File-based routing: route.ts in api/rounds/ = /api/rounds endpoint
- * - Named exports: GET, POST functions = HTTP methods
- * - Server-side only: Runs on server, not in browser
- * - Query parameters: GET requests can include ?player_id=123
  * 
  * FEATURES:
  * - GET: Fetch rounds for a specific player (via query parameter)
@@ -26,74 +18,6 @@
  * - Table: "rounds"
  * - Fields: id (UUID), player_id (UUID), date (date), course (text),
  *           tee (text), rating (float), slope (int), score (int)
- * 
- * =============================================================================
- * NEXT.JS RENDERING STRATEGY - API ROUTES
- * =============================================================================
- * 
- * CURRENT: API Route (Server-Side)
- * - Runs exclusively on the server
- * - Not included in client JavaScript bundle
- * - Handles HTTP requests (GET with query params, POST)
- * - Direct database access via Supabase
- * 
- * WHY API ROUTE:
- * - ✅ Server-side only (secure, no client exposure)
- * - ✅ Supports query parameters for filtering
- * - ✅ Standard REST API pattern
- * - ✅ Can be called from any client
- * 
- * PERFORMANCE:
- * - ✅ Runs on server (fast, no client overhead)
- * - ✅ Can be cached at edge/CDN level
- * - ✅ No JavaScript bundle impact
- * 
- * =============================================================================
- * POTENTIAL IMPROVEMENTS (Future Refactoring)
- * =============================================================================
- * 
- * OPTION 1: Server Actions (Recommended for Next.js 13+)
- * - Replace API routes with Server Actions
- * - Server Actions: export async function addRound(formData: FormData)
- * - Can be called directly from Client Components
- * - Better type safety and error handling
- * - Automatic revalidation after mutations
- * 
- * Benefits:
- * - ✅ Simpler code (no request/response handling)
- * - ✅ Better type safety (TypeScript inference)
- * - ✅ Automatic form handling
- * - ✅ Progressive enhancement (works without JS)
- * 
- * Migration:
- * - Create app/actions/rounds.ts
- * - export async function addRound(formData: FormData)
- * - export async function getRounds(playerId: string)
- * - Call from Client Component: await addRound(formData)
- * - Remove this API route
- * 
- * OPTION 2: Server Components for GET
- * - For GET requests, consider fetching directly in Server Component
- * - No API route needed for initial data
- * - Fetch in app/page.tsx or app/profile/[id]/page.tsx
- * - Only use API route for mutations (or use Server Actions)
- * 
- * OPTION 3: Keep API Routes (If needed)
- * - Keep if you need REST API for external clients
- * - Keep if you need webhooks
- * - Keep if you prefer explicit HTTP endpoints
- * 
- * WHEN TO USE API ROUTES:
- * - Building public REST API
- * - Third-party integrations
- * - Webhooks
- * - When Server Actions aren't sufficient
- * 
- * WHEN TO USE SERVER ACTIONS:
- * - Internal app operations (recommended)
- * - Form submissions
- * - Mutations from Client Components
- * - Better Next.js integration
  */
 
 import { supabaseServer } from "@/lib/supabaseServer" // Supabase client for server-side operations
@@ -104,19 +28,6 @@ import { type NextRequest, NextResponse } from "next/server" // Next.js API rout
 // =============================================================================
 
 /**
- * GET Handler
- * Fetches all rounds for a specific player
- * 
- * HTTP METHOD: GET
- * ENDPOINT: /api/rounds?player_id=123
- * 
- * QUERY PARAMETERS:
- * - player_id (required): UUID of the player to fetch rounds for
- * 
- * RESPONSE:
- * - Success (200): JSON array of round objects (empty array if no rounds)
- * - Error (500): JSON object with error message
- * 
  * FLOW:
  * 1. Extract player_id from query parameters
  * 2. If no player_id, return empty array
@@ -126,15 +37,9 @@ import { type NextRequest, NextResponse } from "next/server" // Next.js API rout
  * 6. Handle errors gracefully
  */
 export async function GET(req: NextRequest) {
-  /**
-   * Extract Query Parameters
-   * req.url contains the full URL including query string
-   * new URL(req.url) parses it
-   * searchParams.get() extracts specific parameter
-   */
   const { searchParams } = new URL(req.url)
   const player_id = searchParams.get("player_id")
-  // Example: /api/rounds?player_id=abc123 → player_id = "abc123"
+
 
   /**
    * Guard Clause: No Player ID
@@ -173,28 +78,6 @@ export async function GET(req: NextRequest) {
 // =============================================================================
 
 /**
- * POST Handler
- * Creates a new round in the database
- * 
- * HTTP METHOD: POST
- * ENDPOINT: /api/rounds
- * 
- * REQUEST BODY:
- * {
- *   "player_id": "uuid-here",
- *   "date": "2024-01-15",
- *   "course": "Pebble Beach",
- *   "tee": "Blue",
- *   "rating": 72.5,
- *   "slope": 130,
- *   "score": 85
- * }
- * 
- * RESPONSE:
- * - Success (200): JSON object of created round (includes generated id)
- * - Error (400): JSON object with error message (validation error)
- * - Error (500): JSON object with error message (database error)
- * 
  * FLOW:
  * 1. Parse request body (JSON)
  * 2. Validate required fields
@@ -216,20 +99,10 @@ export async function POST(req: NextRequest) {
   // VALIDATION
   // =========================================================================
   
-  /**
-   * Validate Required Fields
-   * Check that player_id is provided
-   * Return 400 (Bad Request) if missing
-   */
   if (!player_id) {
     return NextResponse.json({ error: "Player ID required" }, { status: 400 })
   }
 
-  /**
-   * Validate All Round Fields
-   * Check that all required fields are provided
-   * Return 400 if any are missing
-   */
   if (!date || !course || !tee || !rating || !slope || !score) {
     return NextResponse.json(
       { error: "All round fields are required" },
@@ -237,17 +110,6 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // =========================================================================
-  // TYPE CONVERSION
-  // =========================================================================
-  
-  /**
-   * Convert Strings to Numbers
-   * Form inputs return strings, but database expects numbers
-   * - rating: Float (allows decimals like 72.5)
-   * - slope: Integer (whole numbers only, 55-155)
-   * - score: Integer (whole numbers only)
-   */
   const ratingNum = Number.parseFloat(rating) // Convert to float
   const slopeNum = Number.parseInt(slope) // Convert to integer
   const scoreNum = Number.parseInt(score) // Convert to integer
