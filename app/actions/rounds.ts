@@ -4,26 +4,6 @@
  * =============================================================================
  * 
  * Server Actions for round-related operations.
- * 
- * SERVER-SIDE RENDERING BENEFITS:
- * - ✅ Secure: Database operations on server
- * - ✅ Fast: No network round-trip from client
- * - ✅ Type-safe: Full TypeScript support
- * - ✅ Automatic revalidation: Cache updates automatically
- * 
- * CLIENT-SIDE vs SERVER-SIDE:
- * 
- * CLIENT-SIDE (Old approach):
- * - ❌ fetch() call from browser
- * - ❌ Network latency
- * - ❌ Manual cache management
- * - ❌ More JavaScript bundle size
- * 
- * SERVER-SIDE (This approach):
- * - ✅ Direct database access
- * - ✅ No network latency for server
- * - ✅ Automatic cache revalidation
- * - ✅ Smaller client bundle
  */
 
 "use server" // Next.js directive: Server Actions
@@ -33,13 +13,7 @@ import { revalidatePath } from "next/cache"
 import type { Round } from "@/lib/types"
 
 /**
- * Add Round Server Action
- * 
- * SERVER-SIDE PROCESSING:
- * - Type conversion happens on server
- * - Validation on server (secure)
- * - Database insert on server
- * - Cache revalidation automatic
+ * Add Round Server Action (sending to Supabase)
  * 
  * @param formData - Form data from form submission
  * @returns Created round object or error
@@ -110,12 +84,6 @@ export async function addRound(formData: FormData) {
 
 /**
  * Get Rounds for Player Server Function
- * 
- * SERVER-SIDE DATA FETCHING:
- * - ✅ Fetched on server (faster)
- * - ✅ Available in initial HTML
- * - ✅ Can be cached
- * - ✅ No client JavaScript needed
  * 
  * @param playerId - ID of player to fetch rounds for
  * @returns Array of rounds for the player

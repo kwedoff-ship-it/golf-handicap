@@ -8,8 +8,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Your custom CSS can go below */
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
