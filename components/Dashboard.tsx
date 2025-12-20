@@ -6,34 +6,34 @@
  * The main dashboard view of the Golf Handicap Tracker application.
  * Displays player selection, KPIs, recent rounds, and forms for adding data.
  * 
- * FEATURES:
+ * [KW] Features:
  * - Player selector with profile link
  * - Three KPI cards (Handicap, Rounds This Year, Total Rounds)
  * - Recent rounds table (last 10 rounds)
  * - Collapsible forms for adding players and rounds
  * - Responsive grid layout
  * 
- * REACT PATTERNS:
+ * [KW] React:
  * - Presentational component (receives all data via props)
- * - useMemo for expensive calculations
+ * - useMemo for calculations
  * - Component composition (uses smaller components)
  * - Callback props for user interactions
  * 
- * DATA FLOW:
- * - Receives players, rounds, selectedPlayerId from parent
- * - Calculates derived data (handicap, roundsThisYear, recentRounds)
- * - Calls parent callbacks for user actions (onPlayerChange, onAddPlayer, etc.)
- * 
- * TAILWIND STYLING:
+ * [KW] Tailwind:
  * - Dark gradient background
  * - Responsive grid layouts
  * - Consistent spacing and typography
+ * 
+ * [KW] Dashboard To Do::
+ * - Receives players, rounds, selectedPlayerId from parent
+ * - Calculates derived data (handicap, roundsThisYear, recentRounds)
+ * - Calls parent callbacks for user actions (onPlayerChange, onAddPlayer, etc.)
  * 
  * =============================================================================
  * NEXT.JS RENDERING STRATEGY - HYBRID APPROACH
  * =============================================================================
  * 
- * CURRENT: Client Component ("use client" directive)
+ * Client Component ("use client" directive)
  * - Receives server-fetched data as props (from HomeClient)
  * - Handles interactivity (player selection, view switching)
  * - Performs calculations client-side (useMemo)
@@ -44,33 +44,11 @@
  * 3. HomeClient passes data to Dashboard (this component)
  * 4. Dashboard receives data and renders
  * 
- * WHY CLIENT COMPONENT:
- * - ✅ Needs useMemo for calculations (handicap, roundsThisYear, recentRounds)
- * - ✅ Receives callback functions as props (event handlers)
- * - ✅ Part of interactive dashboard flow
- * - ✅ Handles user interactions (player selection, navigation)
- * 
- * SERVER-SIDE BENEFITS (Already Achieved):
- * - ✅ Initial data fetched on server (fast)
- * - ✅ Data available in HTML (SEO-friendly)
- * - ✅ Smaller JavaScript bundle (no data fetching code)
- * 
- * CLIENT-SIDE CALCULATIONS:
+ * Calcs being done on ClientSide:
  * - Handicap calculation (useMemo)
  * - Rounds this year (useMemo)
  * - Recent rounds sorting (useMemo)
  * 
- * POTENTIAL FURTHER OPTIMIZATION:
- * - Could pre-calculate handicap on server
- * - Could pre-calculate roundsThisYear on server
- * - Could pre-sort recent rounds on server
- * - Pass pre-calculated values as props
- * - Benefits: Even smaller bundle, faster render
- * 
- * CURRENT APPROACH IS GOOD:
- * - Data comes from server (fast initial load)
- * - Calculations happen client-side (acceptable for this use case)
- * - Good balance of performance and simplicity
  */
 
 "use client" // Next.js directive: Client Component (needs useMemo and callbacks)
