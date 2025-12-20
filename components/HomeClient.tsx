@@ -5,7 +5,7 @@
  * 
  * Client Component that handles all interactivity for the home page.
  * 
- * WHY THIS IS A CLIENT COMPONENT:
+ * [KW] Notes on why this is a client component:
  * Needs useState for selectedPlayerId and viewingProfile
  * Needs event handlers (onClick, onChange)
  * Dynamic view switching (Dashboard <-> Profile)
@@ -30,7 +30,7 @@ import { addPlayer as addPlayerAction } from "@/app/actions/players"
 import { addRound as addRoundAction } from "@/app/actions/rounds"
 
 /**
- * Props Interface
+ * Props receive
  * 
  * All data comes from Server Component (pre-fetched on server)
  * This component only handles interactivity
@@ -53,7 +53,7 @@ export function HomeClient({
   initialPlayerId,
 }: HomeClientProps) {
   // ===========================================================================
-  // CLIENT-SIDE STATE (Interactivity Only)
+  // CLIENT-SIDE STATE
   // ===========================================================================
   
   /**
@@ -90,12 +90,12 @@ export function HomeClient({
   /**
    * Fetch Rounds When Player Changes
    * 
-   * CLIENT-SIDE FETCHING:
+   * Getting/fetching data client side:
    * - Only needed when player selection changes
    * - Initial data came from server (fast)
    * - Subsequent changes need client-side fetch
    * 
-   * NOTE: Could be optimized with Server Component per route
+   * NOTE: potential to optimize below:
    * (app/dashboard/[playerId]/page.tsx) but current approach is simpler
    */
   useEffect(() => {
@@ -105,7 +105,6 @@ export function HomeClient({
     }
 
     // Only fetch if we don't already have rounds for this player
-    // (Optimization: avoid refetch if we already have the data)
     const fetchRounds = async () => {
       try {
         const res = await fetch(`/api/rounds?player_id=${selectedPlayerId}`)
@@ -121,17 +120,11 @@ export function HomeClient({
   }, [selectedPlayerId])
 
   // ===========================================================================
-  // EVENT HANDLERS (Using Server Actions)
+  // EVENT HANDLERS (Using Server Actions) Players and Rounds
   // ===========================================================================
   
   /**
    * Handle Add Player
-   * 
-   * SERVER ACTION BENEFITS:
-   * - ✅ No fetch() call needed
-   * - ✅ Type-safe (TypeScript inference)
-   * - ✅ Automatic cache revalidation
-   * - ✅ Better error handling
    */
   const handleAddPlayer = async (player: {
     name: string
@@ -146,11 +139,8 @@ export function HomeClient({
     const result = await addPlayerAction(formData)
 
     if (result.success && result.data) {
-      // Update local state
       setPlayers((prev) => [...prev, result.data!])
       setSelectedPlayerId(result.data.id)
-      // Note: Server Action already revalidated cache, but we update
-      // local state immediately for better UX
     }
 
     return result
@@ -158,11 +148,6 @@ export function HomeClient({
 
   /**
    * Handle Add Round
-   * 
-   * SERVER ACTION BENEFITS:
-   * - ✅ Runs on server (secure, fast)
-   * - ✅ Automatic cache revalidation
-   * - ✅ No manual refresh needed
    */
   const handleAddRound = async (round: {
     player_id: string
