@@ -5,26 +5,11 @@
  * 
  * Client Component that handles all interactivity for the home page.
  * 
- * SERVER vs CLIENT COMPONENT BREAKDOWN:
- * 
  * WHY THIS IS A CLIENT COMPONENT:
- * - ✅ Needs useState for selectedPlayerId and viewingProfile
- * - ✅ Needs event handlers (onClick, onChange)
- * - ✅ Dynamic view switching (Dashboard ↔ Profile)
- * - ✅ Interactive player selection
- * 
- * WHAT STAYS ON SERVER (app/page.tsx):
- * - ✅ Data fetching (players, rounds)
- * - ✅ Initial render with data
- * - ✅ Handicap calculations
- * - ✅ Static layout structure
- * 
- * HYBRID APPROACH BENEFITS:
- * - ✅ Fast initial load (data in HTML from server)
- * - ✅ SEO-friendly (content in initial HTML)
- * - ✅ Smaller JavaScript bundle (only interactive parts)
- * - ✅ Progressive enhancement (works without JS for viewing)
- * - ✅ Better performance (server does heavy lifting)
+ * Needs useState for selectedPlayerId and viewingProfile
+ * Needs event handlers (onClick, onChange)
+ * Dynamic view switching (Dashboard <-> Profile)
+ * Interactive player selection
  * 
  * RENDERING FLOW:
  * 1. Server Component (page.tsx) fetches data
@@ -32,9 +17,10 @@
  * 3. Client Component (this file) hydrates for interactivity
  * 4. User interactions happen client-side
  * 5. Mutations use Server Actions (still server-side)
+ * 
  */
 
-"use client" // Next.js directive: Client Component (needs interactivity)
+"use client" // Next.js - Client Component
 
 import { useState, useEffect } from "react"
 import type { Player, Round } from "@/lib/types"
