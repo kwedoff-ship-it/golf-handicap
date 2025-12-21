@@ -3,7 +3,7 @@ import { getRounds } from "@/app/actions/rounds"
 import { HomeClient } from "@/components/HomeClient"
 import type { Player, Round } from "@/lib/types"
 
-// Server Component - fetches initial data on server for fast page load
+// Server component - fetches initial data on the server
 export default async function Home() {
   const players = await getPlayers()
   const initialPlayerId = players.length > 0 ? players[0].id : null

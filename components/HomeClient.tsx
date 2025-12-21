@@ -1,3 +1,5 @@
+// Client component that handles all interactivity and state management
+// Switches between dashboard and profile views
 "use client"
 
 import { useState, useEffect } from "react"
@@ -13,7 +15,6 @@ interface HomeClientProps {
   initialPlayerId: string | null
 }
 
-// Client component handles all UI interactivity and state
 export function HomeClient({
   initialPlayers,
   initialRounds,
@@ -24,7 +25,7 @@ export function HomeClient({
   const [players, setPlayers] = useState<Player[]>(initialPlayers)
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
 
-  // Fetch rounds when player selection changes
+  // Re-fetch rounds whenever selected player changes
   useEffect(() => {
     if (!selectedPlayerId) {
       setRounds([])
@@ -45,6 +46,7 @@ export function HomeClient({
     fetchRounds()
   }, [selectedPlayerId])
 
+  // Handle adding a new player
   const handleAddPlayer = async (player: {
     name: string
     favorite_course: string
@@ -63,6 +65,7 @@ export function HomeClient({
     return result
   }
 
+  // Handle adding a new round
   const handleAddRound = async (round: {
     player_id: string
     date: string
@@ -84,6 +87,7 @@ export function HomeClient({
     const result = await addRoundAction(formData)
 
     if (result.success) {
+      // Re-fetch rounds to get updated list
       const res = await fetch(`/api/rounds?player_id=${round.player_id}`)
       const data = await res.json()
       setRounds(Array.isArray(data) ? data : [])
@@ -94,6 +98,7 @@ export function HomeClient({
 
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId)
 
+  // Show profile view if user clicked "View Profile"
   if (viewingProfile && selectedPlayer) {
     return (
       <Profile
@@ -104,6 +109,7 @@ export function HomeClient({
     )
   }
 
+  // Otherwise show dashboard
   return (
     <Dashboard
       players={players}

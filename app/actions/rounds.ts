@@ -1,11 +1,14 @@
+// Server actions for round data
 "use server"
 
 import { supabaseServer } from "@/lib/supabaseServer"
 import { revalidatePath } from "next/cache"
 import type { Round } from "@/lib/types"
 
+// Add a new round to the database
 export async function addRound(formData: FormData) {
   try {
+    // Extract all form fields
     const player_id = formData.get("player_id") as string
     const date = formData.get("date") as string
     const course = formData.get("course") as string
@@ -14,6 +17,7 @@ export async function addRound(formData: FormData) {
     const slope = formData.get("slope") as string
     const score = formData.get("score") as string
 
+    // Validate required fields
     if (!player_id) {
       return { success: false, error: "Player ID is required" }
     }
@@ -22,6 +26,7 @@ export async function addRound(formData: FormData) {
       return { success: false, error: "All fields are required" }
     }
 
+    // Convert strings to numbers
     const ratingNum = Number.parseFloat(rating)
     const slopeNum = Number.parseInt(slope)
     const scoreNum = Number.parseInt(score)
@@ -30,6 +35,7 @@ export async function addRound(formData: FormData) {
       return { success: false, error: "Invalid numeric values" }
     }
 
+    // Insert into database
     const { data, error } = await supabaseServer
       .from("rounds")
       .insert([
@@ -51,6 +57,7 @@ export async function addRound(formData: FormData) {
       return { success: false, error: error.message }
     }
 
+    // Refresh the page cache
     revalidatePath("/")
     return { success: true, data: data as Round }
   } catch (err) {
@@ -62,6 +69,7 @@ export async function addRound(formData: FormData) {
   }
 }
 
+// Fetch all rounds for a specific player
 export async function getRounds(playerId: string): Promise<Round[]> {
   try {
     if (!playerId) return []

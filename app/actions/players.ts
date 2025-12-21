@@ -1,51 +1,24 @@
-/**
- * =============================================================================
- * SERVER ACTIONS - PLAYERS
- * =============================================================================
- * 
- * 
- * SERVER ACTIONS vs API ROUTES:
- * 
- * SERVER ACTIONS:
- * - Simpler: Just export async function
- * - Type-safe: Full TypeScript inference
- * - Automatic revalidation: Can trigger cache updates
- * - Progressive enhancement: Works without JavaScript
- * - No fetch() needed: Call directly from components
- * - Better error handling: Throws errors naturally
- * 
- * API ROUTES (app/api/players/route.ts):
- * - RESTful: Standard HTTP endpoints
- * - External access: Can be called from anywhere
- * - Webhooks: Can receive external webhooks
- * - More boilerplate: Request/Response handling
- * - Manual error handling: Need to check res.ok
- * 
- */
-
-"use server" // Next.js directive: This file contains Server Actions
+// Server actions for player data
+// These run on the server and can be called directly from components
+"use server"
 
 import { supabaseServer } from "@/lib/supabaseServer"
-import { revalidatePath } from "next/cache" // Next.js function to refresh cached data
+import { revalidatePath } from "next/cache"
 import type { Player } from "@/lib/types"
 
-/**
- * Add Player Server Action
- * @param formData - Form data from form submission
- * @returns Created player object or error
- */
+// Add a new player to the database
 export async function addPlayer(formData: FormData) {
   try {
-    // Extract form data
+    // Extract form fields
     const name = formData.get("name") as string
     const favorite_course = formData.get("favorite_course") as string | null
 
-    // Validation
+    // Validate name is provided
     if (!name || name.trim() === "") {
       return { success: false, error: "Name is required" }
     }
 
-    // Insert into database (server-side)
+    // Insert into database
     const { data, error } = await supabaseServer
       .from("players")
       .insert([{ name: name.trim(), favorite_course: favorite_course?.trim() || null }])
@@ -57,7 +30,7 @@ export async function addPlayer(formData: FormData) {
       return { success: false, error: error.message }
     }
 
-    // Revalidate the page cache so fresh data is shown
+    // Refresh the page cache to show new data
     revalidatePath("/")
     
     return { success: true, data: data as Player }
@@ -70,10 +43,7 @@ export async function addPlayer(formData: FormData) {
   }
 }
 
-/**
- * Get All Players Server Function
- * @returns Array of all players
- */
+// Fetch all players from the database
 export async function getPlayers(): Promise<Player[]> {
   try {
     const { data, error } = await supabaseServer
@@ -92,4 +62,3 @@ export async function getPlayers(): Promise<Player[]> {
     return []
   }
 }
-

@@ -1,15 +1,15 @@
 import type { Round, HandicapHistory } from "./types"
 
-// USGA World Handicap System implementation
+// USGA handicap calculation
 // Formula: (Score - Rating) × 113 / Slope, then average best N rounds × 96%
 
 export function calculateHandicap(rounds: Round[]): number {
   if (!rounds.length) return 0
 
-  // Calculate differential for each round: (Score - Rating) × 113 / Slope
+  // Calculate differential for each round
   const diffs = rounds.map((r) => ((r.score - r.rating) * 113) / r.slope)
 
-  // Determine how many best rounds to use based on USGA rules
+  // USGA rules for how many rounds to use
   let numToUse: number
   const totalRounds = diffs.length
 
@@ -21,9 +21,9 @@ export function calculateHandicap(rounds: Round[]): number {
   else if (totalRounds >= 9) numToUse = 3
   else if (totalRounds >= 6) numToUse = 2
   else if (totalRounds >= 3) numToUse = 1
-  else return 0 // Need at least 3 rounds
+  else return 0
 
-  // Take best (lowest) differentials and apply 96% multiplier
+  // Take best scores and apply 96% multiplier
   const sortedDiffs = [...diffs].sort((a, b) => a - b)
   const bestDiffs = sortedDiffs.slice(0, numToUse)
   const avgDiff = bestDiffs.reduce((a, b) => a + b, 0) / bestDiffs.length
@@ -32,7 +32,7 @@ export function calculateHandicap(rounds: Round[]): number {
   return Number.parseFloat(handicapIndex.toFixed(1))
 }
 
-// Calculate handicap progression over last 6 months for charting
+// Calculate handicap progression over last 6 months for the chart
 export function calculateHandicapHistory(rounds: Round[]): HandicapHistory[] {
   if (rounds.length < 3) return []
 
