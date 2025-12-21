@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Golf Handicap Tracker | USGA Handicap Calculator",
+  title: "Golf Handicap Tracker",
   description: "Track your golf rounds and calculate your official USGA handicap index using the World Handicap System. Fast, accurate, and easy to use.",
   keywords: ["golf", "handicap", "USGA", "golf tracker", "handicap calculator"],
   openGraph: {
