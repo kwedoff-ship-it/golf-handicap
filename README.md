@@ -1,38 +1,162 @@
-[KW] staging -- replication of preprod before pushing to main
+# Golf Handicap Tracker
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A web application for tracking golf rounds and calculating USGA handicap indices using the official World Handicap System.
 
-## Getting Started
+**Live:** https://handicap-tracker.vercel.app
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Implements the USGA World Handicap System formula to calculate accurate handicap indices from recorded rounds. Supports multiple players, tracks historical performance, and displays handicap progression over time.
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS + shadcn/ui
+- Supabase (PostgreSQL)
+- Vercel (deployment + analytics)
+
+## Key Features
+
+**Player Management**
+- Add multiple players with favorite courses
+- Switch between player profiles
+- View detailed player statistics
+
+**Round Tracking**
+- Record rounds with date, course, tee, rating, slope, and score
+- Automatic differential calculation
+- Historical round data with sortable tables
+
+**Handicap Calculation**
+- Official USGA World Handicap System rules
+- Uses best N differentials based on total rounds played
+- 96% multiplier applied per USGA standards
+- Minimum 3 rounds required
+
+**Analytics & Visualization**
+- Handicap progression charts (last 6 months)
+- Year-over-year statistics
+- Global statistics page with ISR
+
+## Architecture
+
+### Rendering Strategy
+
+**Hybrid Server/Client Approach:**
+- Server Components fetch initial data (fast first paint)
+- Client Components handle UI interactivity
+- Server Actions for mutations (no API boilerplate)
+
+**app/page.tsx (Server Component)**
+```typescript
+export default async function Home() {
+  const players = await getPlayers()  // Server-side
+  const rounds = await getRounds(playerId)
+  
+  return <HomeClient initialData={...} />  // Hydrate client
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**ISR for Stats Page:**
+```typescript
+export const revalidate = 3600  // 1 hour
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+async function getGlobalStats() {
+  // Pre-rendered at build, updates hourly
+}
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Database Schema
 
-## Learn More
+**players**
+- id, name, favorite_course
 
-To learn more about Next.js, take a look at the following resources:
+**rounds**
+- id, player_id, date, course, tee, rating, slope, score
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Vercel Platform Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Analytics:** Real user tracking (pageviews, geography)
+- **Speed Insights:** Core Web Vitals monitoring
+- **Edge Middleware:** Security headers on global network
+- **Edge Runtime:** API routes deployed globally
+- **ISR:** Stats page with hourly revalidation
+- **Preview Deployments:** Automatic staging URLs per branch
 
-## Deploy on Vercel
+## Performance
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- First Contentful Paint: ~1.0s
+- Largest Contentful Paint: ~1.2s
+- Core Web Vitals: All "Good" ratings
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Server Component strategy minimizes initial JavaScript bundle. Edge deployment reduces latency for international users.
+
+## Local Setup
+```bash
+git clone https://github.com/kwedoff-ship-it/golf-handicap.git
+cd golf-handicap
+npm install
+npm run dev
+```
+
+Environment variables (`.env.local`):
+```
+NEXT_PUBLIC_SUPABASE_URL=your_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
+SUPABASE_SERVICE_KEY=your_service_key
+```
+
+## USGA Handicap Calculation
+
+**Formula:**
+```
+Differential = (Score - Rating) × 113 / Slope
+Handicap Index = Average of best N differentials × 0.96
+```
+
+**Number of differentials used:**
+- 3-5 rounds: best 1
+- 6-8 rounds: best 2
+- 9-11 rounds: best 3
+- 12-14 rounds: best 4
+- 15-17 rounds: best 5
+- 18 rounds: best 6
+- 19 rounds: best 7
+- 20+ rounds: best 8
+
+Implementation: `lib/handicap.ts`
+
+## Project Structure
+```
+app/
+  ├── page.tsx              # Server Component (data fetching)
+  ├── layout.tsx            # Analytics + metadata
+  ├── stats/page.tsx        # ISR statistics page
+  ├── actions/              # Server Actions (mutations)
+  └── api/                  # Edge Runtime endpoints
+
+components/
+  ├── Dashboard.tsx         # Main UI
+  ├── HomeClient.tsx        # Client-side state management
+  ├── HandicapChart.tsx     # Recharts visualization
+  └── [forms/tables]        # Feature components
+
+lib/
+  ├── handicap.ts           # USGA calculation logic
+  ├── types.ts              # TypeScript definitions
+  └── supabase.ts           # Database client
+```
+
+## Future Improvements
+
+- Dynamic player routes (`/player/[id]`)
+- Authentication (NextAuth.js)
+- Image optimization for player avatars
+- Leaderboard page with ISR
+- Mobile app (React Native)
+
+## License
+
+MIT
