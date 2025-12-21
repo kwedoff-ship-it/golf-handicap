@@ -1,26 +1,4 @@
-/**
- * =============================================================================
- * HOME CLIENT COMPONENT
- * =============================================================================
- * 
- * Client Component that handles all interactivity for the home page.
- * 
- * [KW] Notes on why this is a client component:
- * Needs useState for selectedPlayerId and viewingProfile
- * Needs event handlers (onClick, onChange)
- * Dynamic view switching (Dashboard <-> Profile)
- * Interactive player selection
- * 
- * RENDERING FLOW:
- * 1. Server Component (page.tsx) fetches data
- * 2. Server Component renders initial HTML with data
- * 3. Client Component (this file) hydrates for interactivity
- * 4. User interactions happen client-side
- * 5. Mutations use Server Actions (still server-side)
- * 
- */
-
-"use client" // Next.js - Client Component
+"use client"
 
 import { useState, useEffect } from "react"
 import type { Player, Round } from "@/lib/types"
@@ -29,82 +7,30 @@ import { Profile } from "@/components/Profile"
 import { addPlayer as addPlayerAction } from "@/app/actions/players"
 import { addRound as addRoundAction } from "@/app/actions/rounds"
 
-/**
- * Props receive
- * 
- * All data comes from Server Component (pre-fetched on server)
- * This component only handles interactivity
- */
 interface HomeClientProps {
   initialPlayers: Player[]
-  initialRounds: Round[] // Rounds for first player (if exists)
-  initialPlayerId: string | null // First player's ID (if exists)
+  initialRounds: Round[]
+  initialPlayerId: string | null
 }
 
-/**
- * HomeClient Component
- * 
- * Handles all client-side interactivity while receiving
- * server-fetched data as props.
- */
+// Client component handles all UI interactivity and state
 export function HomeClient({
   initialPlayers,
   initialRounds,
   initialPlayerId,
 }: HomeClientProps) {
-  // ===========================================================================
-  // CLIENT-SIDE STATE
-  // ===========================================================================
-  
-  /**
-   * Selected Player State
-   * Tracks which player is currently selected
-   * Starts with first player (from server)
-   */
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(
-    initialPlayerId
-  )
-  
-  /**
-   * View State
-   * Tracks whether user is viewing profile or dashboard
-   */
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(initialPlayerId)
   const [viewingProfile, setViewingProfile] = useState(false)
-  
-  /**
-   * Players State
-   * Starts with server-fetched data, updates when new player added
-   */
   const [players, setPlayers] = useState<Player[]>(initialPlayers)
-  
-  /**
-   * Rounds State
-   * Starts with server-fetched data, updates when player changes or round added
-   */
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
 
-  // ===========================================================================
-  // DATA REFETCHING (When Player Changes)
-  // ===========================================================================
-  
-  /**
-   * Fetch Rounds When Player Changes
-   * 
-   * Getting/fetching data client side:
-   * - Only needed when player selection changes
-   * - Initial data came from server (fast)
-   * - Subsequent changes need client-side fetch
-   * 
-   * NOTE: potential to optimize below:
-   * (app/dashboard/[playerId]/page.tsx) but current approach is simpler
-   */
+  // Fetch rounds when player selection changes
   useEffect(() => {
     if (!selectedPlayerId) {
       setRounds([])
       return
     }
 
-    // Only fetch if we don't already have rounds for this player
     const fetchRounds = async () => {
       try {
         const res = await fetch(`/api/rounds?player_id=${selectedPlayerId}`)
@@ -119,23 +45,14 @@ export function HomeClient({
     fetchRounds()
   }, [selectedPlayerId])
 
-  // ===========================================================================
-  // EVENT HANDLERS (Using Server Actions) Players and Rounds
-  // ===========================================================================
-  
-  /**
-   * Handle Add Player
-   */
   const handleAddPlayer = async (player: {
     name: string
     favorite_course: string
   }) => {
-    // Create FormData for Server Action
     const formData = new FormData()
     formData.append("name", player.name)
     formData.append("favorite_course", player.favorite_course || "")
 
-    // Call Server Action (runs on server)
     const result = await addPlayerAction(formData)
 
     if (result.success && result.data) {
@@ -146,9 +63,6 @@ export function HomeClient({
     return result
   }
 
-  /**
-   * Handle Add Round
-   */
   const handleAddRound = async (round: {
     player_id: string
     date: string
@@ -158,7 +72,6 @@ export function HomeClient({
     slope: number
     score: number
   }) => {
-    // Create FormData for Server Action
     const formData = new FormData()
     formData.append("player_id", round.player_id)
     formData.append("date", round.date)
@@ -168,12 +81,9 @@ export function HomeClient({
     formData.append("slope", round.slope.toString())
     formData.append("score", round.score.toString())
 
-    // Call Server Action (runs on server)
     const result = await addRoundAction(formData)
 
     if (result.success) {
-      // Refetch rounds to show new round
-      // Server Action revalidated cache, but we refetch for immediate update
       const res = await fetch(`/api/rounds?player_id=${round.player_id}`)
       const data = await res.json()
       setRounds(Array.isArray(data) ? data : [])
@@ -182,17 +92,8 @@ export function HomeClient({
     return result
   }
 
-  // ===========================================================================
-  // COMPUTED VALUES
-  // ===========================================================================
-  
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId)
 
-  // ===========================================================================
-  // RENDER
-  // ===========================================================================
-  
-  // Show profile view if viewing profile and player is selected
   if (viewingProfile && selectedPlayer) {
     return (
       <Profile
@@ -203,7 +104,6 @@ export function HomeClient({
     )
   }
 
-  // Show dashboard view
   return (
     <Dashboard
       players={players}
@@ -216,4 +116,3 @@ export function HomeClient({
     />
   )
 }
-
