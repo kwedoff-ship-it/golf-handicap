@@ -29,56 +29,6 @@
  * 4. Provides addRound function to create new rounds
  * 5. Automatically refreshes rounds after successful creation
  * 
- * =============================================================================
- * NEXT.JS RENDERING STRATEGY - CLIENT-SIDE DATA FETCHING
- * =============================================================================
- * 
- * CURRENT: Client-Side Data Fetching Hook
- * - Runs in browser, fetches when playerId changes
- * - Uses fetch() to call API routes
- * - Reactive to prop changes (playerId)
- * 
- * WHY CLIENT-SIDE:
- * - ✅ Dynamic fetching based on user selection
- * - ✅ Reactive updates when player changes
- * - ✅ Good for interactive dashboards
- * - ✅ Provides loading/error states
- * 
- * LIMITATIONS:
- * - ❌ Data fetched after component mounts
- * - ❌ Waterfall: Select player → API call → Render
- * - ❌ No prefetching or caching benefits
- * - ❌ Requires JavaScript
- * 
- * =============================================================================
- * POTENTIAL IMPROVEMENTS (Future Refactoring)
- * =============================================================================
- * 
- * OPTION 1: Server Component with Dynamic Routes
- * - Use app/dashboard/[playerId]/page.tsx
- * - Fetch rounds in Server Component based on route param
- * - Benefits: Pre-rendered, SEO-friendly, faster
- * 
- * OPTION 2: Parallel Data Fetching
- * - Fetch all players' rounds in parallel on server
- * - Pass as props, filter client-side
- * - Benefits: Single request, better caching
- * 
- * OPTION 3: Server Actions for Mutations
- * - Replace addRound with Server Action
- * - Server Action handles insert + revalidation
- * - No manual refresh needed
- * - Better error handling
- * 
- * OPTION 4: React Query / SWR
- * - Use data fetching library
- * - Better caching, refetching, optimistic updates
- * - Still client-side but more powerful
- * 
- * WHEN TO KEEP THIS APPROACH:
- * - Dynamic player selection needed
- * - Real-time updates required
- * - Highly interactive UI
  */
 
 import { useState, useEffect } from "react" // React hooks (Client Component only)
@@ -184,10 +134,6 @@ export function useRounds(playerId: string | null) {
     fetchRounds() // Call the async function
   }, [playerId]) // Dependency: Re-run when playerId changes
 
-  // ===========================================================================
-  // ADD ROUND FUNCTION
-  // ===========================================================================
-  
   /**
    * Add Round Function
    * Creates a new round via API and refreshes the rounds list

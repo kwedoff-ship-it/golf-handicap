@@ -24,7 +24,7 @@
  * - Responsive grid layouts
  * - Consistent spacing and typography
  * 
- * [KW] Dashboard To Do::
+ * [KW] Dashboard To Do:
  * - Receives players, rounds, selectedPlayerId from parent
  * - Calculates derived data (handicap, roundsThisYear, recentRounds)
  * - Calls parent callbacks for user actions (onPlayerChange, onAddPlayer, etc.)

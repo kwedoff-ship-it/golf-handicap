@@ -5,75 +5,26 @@
  * 
  * A reusable table component for displaying golf rounds in a structured format.
  * 
- * FEATURES:
+ * [KW] Features:
  * - Displays rounds in a table with columns: Date, Course, Tee, Rating, Slope, Score
- * - Optional differential column (for profile view)
- * - Optional row limit (for dashboard "recent rounds")
  * - Empty state message when no rounds exist
  * - Sticky header (stays visible when scrolling)
  * - Hover effects on rows
  * - Calculates differential for each round
  * 
- * REACT PATTERNS:
+ * [KW] React:
  * - Presentational component (receives data via props)
  * - Array.map() to render table rows
  * - Conditional rendering for optional columns
  * - Conditional rendering for empty state
  * 
- * TAILWIND STYLING:
+ * [KW] Tailwind:
  * - Dark theme table
  * - Sticky header with backdrop blur
  * - Responsive overflow handling
  * - Hover states for interactivity
  * 
- * =============================================================================
- * NEXT.JS RENDERING STRATEGY - SERVER DATA, CLIENT RENDERING
- * =============================================================================
- * 
- * CURRENT: Client Component ("use client" directive)
- * - Receives server-fetched data as props
- * - Calculates differentials client-side
- * - No hooks, no event handlers, no state
- * 
- * SERVER-SIDE DATA:
- * - ✅ Rounds data comes from server (fast, SEO-friendly)
- * - ✅ Data available in initial HTML
- * - ✅ No client-side API calls needed
- * 
- * CLIENT-SIDE CALCULATIONS:
- * - calculateDifferential runs client-side
- * - Pure function (no side effects)
- * - Could run on server, but current approach is fine
- * 
- * WHY IT'S CLIENT COMPONENT:
- * - Used inside Client Components (Dashboard, Profile)
- * - When parent is Client Component, child must also be Client
- * - calculateDifferential is pure function (could run on server)
- * 
- * SERVER vs CLIENT RENDERING:
- * 
- * SERVER RENDERING (If we converted):
- * - ✅ Pre-calculate differentials on server
- * - ✅ Smaller JavaScript bundle
- * - ✅ Faster render (no calculations needed)
- * - ❌ More complex (need to pass pre-calculated data)
- * 
- * CLIENT RENDERING (Current):
- * - ✅ Simpler (calculations happen where used)
- * - ✅ Flexible (easy to change calculations)
- * - ✅ Data comes from server (already fast)
- * - ❌ Slightly larger bundle (calculation code)
- * 
- * CURRENT APPROACH IS GOOD:
- * - Data fetching is server-side (main performance win)
- * - Calculations are lightweight (acceptable client-side)
- * - Good balance of performance and simplicity
- * 
- * FUTURE OPTIMIZATION (If needed):
- * - Pre-calculate differentials on server
- * - Pass as props: roundsWithDiffs[]
- * - Benefits: Smaller bundle, faster render
- * - Trade-off: More complex data structure
+
  */
 
 "use client" // Next.js directive: Client Component (only because parent is client)
