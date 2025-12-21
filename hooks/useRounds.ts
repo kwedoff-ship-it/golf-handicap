@@ -1,104 +1,35 @@
-/**
- * =============================================================================
- * useRounds CUSTOM HOOK
- * =============================================================================
- * 
- * A custom React hook that manages rounds data fetching and state.
- * Fetches rounds for a specific player and provides function to add new rounds.
- * 
- * FEATURES:
- * - Fetches rounds when playerId changes
- * - Provides loading and error states
- * - addRound function for creating new rounds
- * - Automatically refreshes rounds list after adding
- * - Handles case when no player is selected
- * 
- * REACT PATTERNS:
- * - Custom hook (starts with "use")
- * - useState for local state management
- * - useEffect with dependency on playerId
- * - Returns object with state and functions
- * 
- * USAGE:
- * const { rounds, loading, error, addRound } = useRounds(selectedPlayerId)
- * 
- * DATA FLOW:
- * 1. Hook watches playerId prop
- * 2. When playerId changes, fetches rounds for that player
- * 3. Updates rounds state with fetched data
- * 4. Provides addRound function to create new rounds
- * 5. Automatically refreshes rounds after successful creation
- * 
- */
+// Custom hook to manage rounds data for a specific player
+// Re-fetches whenever the selected player changes
+import { useState, useEffect } from "react"
+import type { Round } from "@/lib/types"
 
-import { useState, useEffect } from "react" // React hooks (Client Component only)
-import type { Round } from "@/lib/types" // TypeScript type
-
-/**
- * useRounds Hook
- * 
- * @param playerId - ID of player to fetch rounds for (null if no player selected)
- * 
- * Returns an object containing:
- * - rounds: Array of rounds for the selected player
- * - loading: Boolean indicating if data is being fetched
- * - error: String error message (null if no error)
- * - addRound: Function to add a new round
- */
 export function useRounds(playerId: string | null) {
-  // ===========================================================================
-  // STATE MANAGEMENT
-  // ===========================================================================
-  
-  /**
-   * Rounds State
-   * Stores the array of rounds for the selected player
-   * Empty array if no player selected or no rounds exist
-   */
+  // Store rounds for the selected player
   const [rounds, setRounds] = useState<Round[]>([])
   
-  /**
-   * Loading State
-   * Indicates whether data is currently being fetched
-   * Starts as false (only true during fetch)
-   */
+  // Loading state for showing spinner
   const [loading, setLoading] = useState(false)
   
-  /**
-   * Error State
-   * Stores error message if fetch fails
-   */
+  // Error messages if fetch fails
   const [error, setError] = useState<string | null>(null)
 
-  // ===========================================================================
-  // DATA FETCHING (Runs when playerId changes)
-  // ===========================================================================
-  
-  /**
-   * Fetch Rounds Effect
-   * Runs whenever playerId changes
-   * 
-   * DEPENDENCY: [playerId]
-   * - If playerId is null, clears rounds and returns early
-   * - If playerId changes, fetches rounds for new player
-   */
+  // Fetch rounds whenever playerId changes
   useEffect(() => {
-    // Guard clause: Don't fetch if no player selected
+    // Don't fetch if no player is selected
     if (!playerId) {
-      setRounds([]) // Clear rounds when no player selected
+      setRounds([])
       return
     }
 
     const fetchRounds = async () => {
       try {
-        setLoading(true) // Start loading
-        setError(null) // Clear any previous errors
+        setLoading(true)
+        setError(null)
 
-        // Make API request with player_id as query parameter
+        // Query parameter tells API which player's rounds to get
         const res = await fetch(`/api/rounds?player_id=${playerId}`)
-        // Query parameter: ?player_id=123 tells API which player's rounds to fetch
 
-        // Validate response is JSON
+        // Make sure response is JSON
         const contentType = res.headers.get("content-type")
         if (!contentType || !contentType.includes("application/json")) {
           console.error("Rounds API returned non-JSON response")
@@ -107,10 +38,9 @@ export function useRounds(playerId: string | null) {
           return
         }
 
-        // Parse JSON response
         const data = await res.json()
 
-        // Check if API returned an error object
+        // Check for API errors
         if (data.error) {
           console.error("API error fetching rounds:", data.error)
           setError(data.error)
@@ -118,78 +48,56 @@ export function useRounds(playerId: string | null) {
           return
         }
 
-        // Ensure we have an array (API returns [] if no rounds exist)
+        // Set rounds or empty array if none exist
         setRounds(Array.isArray(data) ? data : [])
       } catch (err) {
-        // Catch network errors, etc.
         console.error("Error fetching rounds:", err)
         setError(err instanceof Error ? err.message : "Failed to fetch rounds")
         setRounds([])
       } finally {
-        // Always clear loading state
         setLoading(false)
       }
     }
 
-    fetchRounds() // Call the async function
-  }, [playerId]) // Dependency: Re-run when playerId changes
+    fetchRounds()
+  }, [playerId])
 
-  /**
-   * Add Round Function
-   * Creates a new round via API and refreshes the rounds list
-   * 
-   * @param round - Round data (without id, which is generated by database)
-   * @returns Object with success status and optional error/data
-   */
+  // Function to add a new round
   const addRound = async (round: Omit<Round, "id">) => {
     try {
-      setLoading(true) // Show loading state
-      setError(null) // Clear any previous errors
+      setLoading(true)
+      setError(null)
 
-      // Make POST request to create new round
       const res = await fetch("/api/rounds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(round), // Convert object to JSON string
+        body: JSON.stringify(round),
       })
 
       const data = await res.json()
 
-      // Check if request was successful
       if (res.ok) {
-        // Refresh rounds list to show new round
-        // We fetch again rather than adding locally to ensure data consistency
+        // Re-fetch all rounds to make sure everything is in sync
         const roundsRes = await fetch(`/api/rounds?player_id=${playerId}`)
         const roundsData = await roundsRes.json()
         setRounds(Array.isArray(roundsData) ? roundsData : [])
         
-        return { success: true, data } // Return success with created round data
+        return { success: true, data }
       } else {
-        // Request failed
         const error = data.error || "Failed to add round"
         console.error(error)
         setError(error)
         return { success: false, error }
       }
     } catch (err) {
-      // Catch network errors, etc.
       const error = err instanceof Error ? err.message : "Failed to add round"
       console.error(error)
       setError(error)
       return { success: false, error }
     } finally {
-      // Always clear loading state
       setLoading(false)
     }
   }
 
-  // ===========================================================================
-  // RETURN VALUES
-  // ===========================================================================
-  
-  /**
-   * Return Hook Interface
-   * Components using this hook can destructure these values
-   */
   return { rounds, loading, error, addRound }
 }
