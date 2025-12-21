@@ -3,6 +3,7 @@
 "use client"
 
 import { useMemo } from "react"
+import Link from "next/link"
 import type { Player, Round } from "@/lib/types"
 import { calculateHandicap } from "@/lib/handicap"
 import { PlayerSelector } from "./PlayerSelector"
@@ -71,6 +72,12 @@ export function Dashboard({
           <p className="text-slate-400 text-lg">
             Track your rounds and monitor your progress
           </p>
+          <Link 
+            href="/stats"
+            className="inline-block mt-3 text-blue-400 hover:text-blue-300 text-sm underline"
+          >
+            View Global Statistics →
+          </Link>
         </div>
 
         {/* Player selector + KPI cards */}
@@ -81,19 +88,16 @@ export function Dashboard({
             onPlayerChange={onPlayerChange}
             onViewProfile={onViewProfile}
           />
-
           <KPICard
             label="Current Handicap Index"
             value={handicap}
             subtitle={`Based on ${rounds.length} round${rounds.length !== 1 ? "s" : ""}`}
           />
-
           <KPICard
             label="Rounds This Year"
             value={roundsThisYear}
             subtitle={new Date().getFullYear().toString()}
           />
-
           <KPICard label="Total Rounds" value={rounds.length} subtitle="All Time" />
         </div>
 
