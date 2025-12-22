@@ -3,6 +3,27 @@ import type { Round, HandicapHistory } from "./types"
 // USGA handicap calculation
 // Formula: (Score - Rating) × 113 / Slope, then average best N rounds × 96%
 
+/*
+ * Why 113?
+ * - 113 is the standard slope rating
+ * - This normalizes difficulty across all courses
+ * - Allows fair comparison between different courses
+ * 
+ * Why 96%?
+ * - Encourages players to play their best
+ * - Prevents sandbagging (intentionally playing poorly)
+ * - Makes handicaps slightly more competitive
+ */
+
+/*
+* calculateHandicap([
+ *   { score: 85, rating: 72.5, slope: 130, ... },
+ *   { score: 90, rating: 72.5, slope: 130, ... },
+ *   ...
+ * ])
+ * Returns: 12.5
+ */
+
 export function calculateHandicap(rounds: Round[]): number {
   if (!rounds.length) return 0
 
