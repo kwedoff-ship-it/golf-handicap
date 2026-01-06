@@ -1,5 +1,3 @@
-// Client component that handles all interactivity and state management
-// Switches between dashboard and profile views
 "use client"
 
 import { useState, useEffect } from "react"
@@ -13,8 +11,6 @@ interface HomeClientProps {
   initialPlayers: Player[]
   initialRounds: Round[]
   initialPlayerId: string | null
-
-  // 🚩 LaunchDarkly flag
   newCheckoutEnabled: boolean
 }
 
@@ -22,7 +18,7 @@ export function HomeClient({
   initialPlayers,
   initialRounds,
   initialPlayerId,
-  newCheckoutEnabled, // 👈 added
+  newCheckoutEnabled,
 }: HomeClientProps) {
   const [selectedPlayerId, setSelectedPlayerId] =
     useState<string | null>(initialPlayerId)
@@ -30,7 +26,6 @@ export function HomeClient({
   const [players, setPlayers] = useState<Player[]>(initialPlayers)
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
 
-  // Re-fetch rounds whenever selected player changes
   useEffect(() => {
     if (!selectedPlayerId) {
       setRounds([])
@@ -51,7 +46,6 @@ export function HomeClient({
     fetchRounds()
   }, [selectedPlayerId])
 
-  // Handle adding a new player
   const handleAddPlayer = async (player: {
     name: string
     favorite_course: string
@@ -70,7 +64,6 @@ export function HomeClient({
     return result
   }
 
-  // Handle adding a new round
   const handleAddRound = async (round: {
     player_id: string
     date: string
@@ -102,11 +95,9 @@ export function HomeClient({
 
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId)
 
-  // Show profile view if user clicked "View Profile"
   if (viewingProfile && selectedPlayer) {
     return (
       <>
-        {/* 🚩 Flag banner (visible POC proof) */}
         {newCheckoutEnabled && (
           <div className="mb-4 rounded bg-green-100 p-2 text-green-800">
             🚀 New Checkout Enabled (LaunchDarkly)
@@ -122,10 +113,8 @@ export function HomeClient({
     )
   }
 
-  // Otherwise show dashboard
   return (
     <>
-      {/* 🚩 Flag banner (visible POC proof) */}
       {newCheckoutEnabled && (
         <div className="mb-4 rounded bg-green-100 p-2 text-green-800">
           🚀 New Checkout Enabled (LaunchDarkly)
