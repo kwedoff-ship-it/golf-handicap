@@ -13,14 +13,19 @@ interface HomeClientProps {
   initialPlayers: Player[]
   initialRounds: Round[]
   initialPlayerId: string | null
+
+  // 🚩 LaunchDarkly flag
+  newCheckoutEnabled: boolean
 }
 
 export function HomeClient({
   initialPlayers,
   initialRounds,
   initialPlayerId,
+  newCheckoutEnabled, // 👈 added
 }: HomeClientProps) {
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(initialPlayerId)
+  const [selectedPlayerId, setSelectedPlayerId] =
+    useState<string | null>(initialPlayerId)
   const [viewingProfile, setViewingProfile] = useState(false)
   const [players, setPlayers] = useState<Player[]>(initialPlayers)
   const [rounds, setRounds] = useState<Round[]>(initialRounds)
@@ -87,7 +92,6 @@ export function HomeClient({
     const result = await addRoundAction(formData)
 
     if (result.success) {
-      // Re-fetch rounds to get updated list
       const res = await fetch(`/api/rounds?player_id=${round.player_id}`)
       const data = await res.json()
       setRounds(Array.isArray(data) ? data : [])
@@ -101,24 +105,42 @@ export function HomeClient({
   // Show profile view if user clicked "View Profile"
   if (viewingProfile && selectedPlayer) {
     return (
-      <Profile
-        player={selectedPlayer}
-        rounds={rounds}
-        onBack={() => setViewingProfile(false)}
-      />
+      <>
+        {/* 🚩 Flag banner (visible POC proof) */}
+        {newCheckoutEnabled && (
+          <div className="mb-4 rounded bg-green-100 p-2 text-green-800">
+            🚀 New Checkout Enabled (LaunchDarkly)
+          </div>
+        )}
+
+        <Profile
+          player={selectedPlayer}
+          rounds={rounds}
+          onBack={() => setViewingProfile(false)}
+        />
+      </>
     )
   }
 
   // Otherwise show dashboard
   return (
-    <Dashboard
-      players={players}
-      selectedPlayerId={selectedPlayerId}
-      rounds={rounds}
-      onPlayerChange={setSelectedPlayerId}
-      onViewProfile={() => setViewingProfile(true)}
-      onAddPlayer={handleAddPlayer}
-      onAddRound={handleAddRound}
-    />
+    <>
+      {/* 🚩 Flag banner (visible POC proof) */}
+      {newCheckoutEnabled && (
+        <div className="mb-4 rounded bg-green-100 p-2 text-green-800">
+          🚀 New Checkout Enabled (LaunchDarkly)
+        </div>
+      )}
+
+      <Dashboard
+        players={players}
+        selectedPlayerId={selectedPlayerId}
+        rounds={rounds}
+        onPlayerChange={setSelectedPlayerId}
+        onViewProfile={() => setViewingProfile(true)}
+        onAddPlayer={handleAddPlayer}
+        onAddRound={handleAddRound}
+      />
+    </>
   )
 }
